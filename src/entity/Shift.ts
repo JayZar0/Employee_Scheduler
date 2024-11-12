@@ -1,10 +1,10 @@
-import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column} from "typeorm"
 
 @Entity()
 export class Shift {
 
     @PrimaryGeneratedColumn()
-    id: number
+    id: string
 
     // This is a foreign key that references the employee working the shift
     @Column()

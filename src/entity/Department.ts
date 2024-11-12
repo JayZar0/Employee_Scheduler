@@ -1,10 +1,10 @@
-import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column} from "typeorm"
 
 @Entity()
 export class Department {
 
     @PrimaryGeneratedColumn()
-    id: number
+    id: String
 
     @Column()
     name: string

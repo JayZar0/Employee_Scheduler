@@ -1,10 +1,10 @@
-import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column} from "typeorm"
 
 @Entity()
 export class Employee {
 
     @PrimaryGeneratedColumn()
-    id: number
+    id: string
 
     @Column()
     firstName: string
