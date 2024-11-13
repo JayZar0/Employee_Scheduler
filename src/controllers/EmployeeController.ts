@@ -10,7 +10,7 @@ import {Controller} from "../decorator/Controller";
 export class EmployeeController {
 
     // make a connection to the DB using a repository to only the student table
-    studentRepo: Repository<Employee> = AppDataSource.getRepository(Employee);
+    employeeRepo: Repository<Employee> = AppDataSource.getRepository(Employee);
 
     validOptions : ValidatorOptions = {
         whitelist: true,
@@ -26,17 +26,17 @@ export class EmployeeController {
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
         if (req.params.uuid) {
-            return this.studentRepo.findOneBy({id: req.params.uuid})
+            return this.employeeRepo.findOneBy({id: req.params.uuid})
         } else {
             // use js to build the findOptions for sorting and searching
             // looks like this {where: {lowMoneyDefCon: 3}, order: {favHardDrink: "ASC"}}
             const findOptions = {where: [], order:{}}
-            const existingColumns = this.studentRepo.metadata.ownColumns.map(c => c.propertyName)
+            const existingColumns = this.employeeRepo.metadata.ownColumns.map(c => c.propertyName)
 
-            const sortByField = existingColumns.includes(req.query.mixology)? req.query.mixology : 'id' // if not sort then use default of id
-            const sortDirection = req.query.assbackwards? "DESC" : "ASC"
-            findOptions.order[sortByField] = sortDirection
-            console.log('Order Clause: \n', findOptions.order)
+            // const sortByField = existingColumns.includes(req.query.mixology)? req.query.mixology : 'id' // if not sort then use default of id
+            // const sortDirection = req.query.sortorder? "DESC" : "ASC"
+            // findOptions.order[sortByField] = sortDirection
+            // console.log('Order Clause: \n', findOptions.order)
 
             if (req.query.trouve) { // obly add the where clauses if the search query exists
                 for (const  columnName of existingColumns) {
@@ -45,14 +45,14 @@ export class EmployeeController {
                 }
             }
             console.log('Where Clause: ', findOptions.where)
-            return this.studentRepo.find(findOptions); // returns all if there are no other options specified
+            return this.employeeRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
 
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
-        if (await this.studentRepo.existsBy({ id: req.params.uuid })) {
-            await this.studentRepo.delete({ id: req.params.uuid })
+        if (await this.employeeRepo.existsBy({ id: req.params.uuid })) {
+            await this.employeeRepo.delete({ id: req.params.uuid })
             return ''
             res.statusCode = 204 // Success "no content" don't send any content or browser will complain
         } else {
@@ -73,7 +73,7 @@ export class EmployeeController {
             return violations // these are still ugly - should be cleaned up for teammates
         } else {
             res.statusCode = 201 // created
-            return this.studentRepo.insert(studentToInsert)
+            return this.employeeRepo.insert(studentToInsert)
         }
     }
 
@@ -85,7 +85,7 @@ export class EmployeeController {
         // }
 
         // ensure student exists
-        const studentToUpdate = await this.studentRepo.findOneBy({ id:req.params.uuid })
+        const studentToUpdate = await this.employeeRepo.findOneBy({ id:req.params.uuid })
 
         // NO NEED for OBJECT.assign since the repo will return a student object -already has rules
         Object.assign(studentToUpdate, req.body)
@@ -100,7 +100,7 @@ export class EmployeeController {
                 res.statusCode = 422 // Unprocessable Content
                 return violations
             } else {
-                return this.studentRepo.update(req.params.uuid, studentToUpdate)
+                return this.employeeRepo.update(req.params.uuid, studentToUpdate)
             }
         }
     }

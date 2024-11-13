@@ -26,6 +26,7 @@ AppDataSource.initialize().then(async () => {
     app.use(bodyParser.json())
     app.use(cors(corsOptions))
     app.use((req: Request, res: Response, next: NextFunction) => {
+        // Authorization should provide if the user is a employee or a manager
         // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
         // for super secure api servers
         next()
