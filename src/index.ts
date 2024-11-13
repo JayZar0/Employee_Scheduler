@@ -7,7 +7,9 @@ import * as createError from "http-errors"
 import * as cors from 'cors'
 
 // Entity/Controller imports
-import { User } from './entity/User'
+import { Department } from "./entity/Department"
+import { Employee } from "./entity/Employee"
+import { Shift } from "./entity/Shift"
 import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
@@ -85,21 +87,21 @@ AppDataSource.initialize().then(async () => {
     app.listen(port)
 
     // insert new users for test
-    await AppDataSource.manager.save(
-        AppDataSource.manager.create(User, {
-            firstName: "Timber",
-            lastName: "Saw",
-            age: 27
-        })
-    )
+    // await AppDataSource.manager.save(
+    //     AppDataSource.manager.create(User, {
+    //         firstName: "Timber",
+    //         lastName: "Saw",
+    //         age: 27
+    //     })
+    // )
 
-    await AppDataSource.manager.save(
-        AppDataSource.manager.create(User, {
-            firstName: "Phantom",
-            lastName: "Assassin",
-            age: 24
-        })
-    )
+    // await AppDataSource.manager.save(
+    //     AppDataSource.manager.create(User, {
+    //         firstName: "Phantom",
+    //         lastName: "Assassin",
+    //         age: 24
+    //     })
+    // )
 
     console.log(`Open http://localhost:${port}/users to see results`)
 

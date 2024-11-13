@@ -6,7 +6,7 @@ import {AppDataSource} from "../data-source";
 import {Like, Repository} from "typeorm";
 import {Controller} from "../decorator/Controller";
 
-@Controller('/department')
+@Controller('/departments')
 export class DepartmentController {
 
     // make a connection to the DB using a repository to only the student table
@@ -19,7 +19,7 @@ export class DepartmentController {
         validationError: {
             target: false,
             value: false
-        },
+        }
     }
 
     // CRUD - create, read, update, and delete
@@ -63,17 +63,17 @@ export class DepartmentController {
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
         // copy the data we want into the object with all the rules
-        const studentToInsert = Object.assign(new Department(), req.body)
+        const departmentToCreate = Object.assign(new Department(), req.body)
 
         // validate the student with all the data and the rules
-        const violations : ValidationError[] = await validate(studentToInsert, this.validOptions);
+        const violations : ValidationError[] = await validate(departmentToCreate, this.validOptions)
 
         if (violations.length) { // there are errors
             res.statusCode = 422 // unprocessable content
             return violations // these are still ugly - should be cleaned up for teammates
         } else {
             res.statusCode = 201 // created
-            return this.departmentRepo.insert(studentToInsert)
+            return this.departmentRepo.insert(departmentToCreate)
         }
     }
 

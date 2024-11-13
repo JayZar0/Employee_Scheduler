@@ -6,7 +6,7 @@ import {AppDataSource} from "../data-source";
 import {Like, Repository} from "typeorm";
 import {Controller} from "../decorator/Controller";
 
-@Controller('/shift')
+@Controller('/shifts')
 export class ShiftController {
 
     // make a connection to the DB using a repository to only the student table
@@ -85,22 +85,22 @@ export class ShiftController {
         // }
 
         // ensure student exists
-        const studentToUpdate = await this.shiftRepo.findOneBy({ id:req.params.uuid })
+        const shiftToAssign = await this.shiftRepo.findOneBy({ id:req.params.uuid })
 
         // NO NEED for OBJECT.assign since the repo will return a student object -already has rules
-        Object.assign(studentToUpdate, req.body)
+        Object.assign(shiftToAssign, req.body)
 
         // update the student
-        if (!studentToUpdate) {
+        if (!shiftToAssign) {
             next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
         } else {
             //WHENEVER YOU SAVE/UPDATE - VALIDATE
-            const violations : ValidationError[] = await validate(studentToUpdate, this.validOptions)
+            const violations : ValidationError[] = await validate(shiftToAssign, this.validOptions)
             if (violations.length) {
                 res.statusCode = 422 // Unprocessable Content
                 return violations
             } else {
-                return this.shiftRepo.update(req.params.uuid, studentToUpdate)
+                return this.shiftRepo.update(req.params.uuid, shiftToAssign)
             }
         }
     }
