@@ -12,7 +12,6 @@ import {Department} from "../entity/Department";
 @Controller('/shifts')
 export class ShiftController {
 
-    // make a connection to the DB using a repository to only the student table
     shiftRepo: Repository<Shift> = AppDataSource.getRepository(Shift);
 
     validOptions : ValidatorOptions = {
@@ -25,7 +24,12 @@ export class ShiftController {
         },
     }
 
-    // CRUD - create, read, update, and delete
+    /**
+     * READ one or more shifts
+     * @param req
+     * @param res
+     * @param next
+     */
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
         if (req.params.uuid) {
@@ -36,22 +40,28 @@ export class ShiftController {
             const findOptions = {where: [], order:{}}
             const existingColumns = this.shiftRepo.metadata.ownColumns.map(c => c.propertyName)
 
-            // const sortByField = existingColumns.includes(req.query.mixology)? req.query.mixology : 'id' // if not sort then use default of id
-            // const sortDirection = req.query.sortorder? "DESC" : "ASC"
-            // findOptions.order[sortByField] = sortDirection
-            // console.log('Order Clause: \n', findOptions.order)
+            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'id';
+            const sortDirection = req.query.sortorder ? "DESC" : "ASC";
+            findOptions.order[sortByField] = sortDirection;
+            console.log('Order Clause: \n', findOptions.order);
 
-            if (req.query.trouve) { // obly add the where clauses if the search query exists
-                for (const  columnName of existingColumns) {
-                    // sytactic sugar - when creating a JS object wiht a dynamic property name use [ ]
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.trouve}%`) })
+            if (req.query.search) { // only add the where clauses if the search query exists
+                for (const columnName of existingColumns) {
+                    findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
                 }
             }
+
             console.log('Where Clause: ', findOptions.where)
             return this.shiftRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
 
+    /**
+     * DELETE an existing shift
+     * @param req
+     * @param res
+     * @param next
+     */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
         if (await this.shiftRepo.existsBy({ id: req.params.uuid })) {
@@ -63,6 +73,12 @@ export class ShiftController {
         }
     }
 
+    /**
+     * CREATE a new shift
+     * @param req
+     * @param res
+     * @param next
+     */
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
         console.log('Request Body:', req.body); // Debugging
@@ -86,24 +102,24 @@ export class ShiftController {
         }
     }
 
+    /**
+     * UPDATE an existing shift
+     * @param req
+     * @param res
+     * @param next
+     */
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
-        // to optimize the processor cycles do simple checks first - id. before calling the db
-        // if (req.params.uuid != req.body.id) {
-        //     next()
-        // }
 
-        // ensure student exists
+        // ensure shift exists
         const shiftToAssign = await this.shiftRepo.findOneBy({ id:req.params.uuid })
-
-        // NO NEED for OBJECT.assign since the repo will return a student object -already has rules
         Object.assign(shiftToAssign, req.body)
 
-        // update the student
+        // update the shift
         if (!shiftToAssign) {
             next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
         } else {
-            //WHENEVER YOU SAVE/UPDATE - VALIDATE
+            // validate & save
             const violations : ValidationError[] = await validate(shiftToAssign, this.validOptions)
             if (violations.length) {
                 res.statusCode = 422 // Unprocessable Content

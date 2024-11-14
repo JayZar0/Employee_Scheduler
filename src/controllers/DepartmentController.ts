@@ -9,7 +9,6 @@ import {Controller} from "../decorator/Controller";
 @Controller('/departments')
 export class DepartmentController {
 
-    // make a connection to the DB using a repository to only the student table
     departmentRepo: Repository<Department> = AppDataSource.getRepository(Department);
 
     validOptions : ValidatorOptions = {
@@ -23,7 +22,7 @@ export class DepartmentController {
     }
 
     /**
-     * READ one department
+     * READ one or more department
      * @param req - the HTTP request
      * @param res - the HTTP response
      * @param next - callback function
