@@ -57,7 +57,7 @@ export class DepartmentController {
         if (await this.departmentRepo.existsBy({ id: req.params.uuid })) {
             await this.departmentRepo.delete({ id: req.params.uuid })
             return ''
-            res.statusCode = 204 // Success "no content" don't send any content or browser will complain
+            res.statusCode = 204 // success no content
         } else {
             next(); // let the catchall in index.ts handle the 404
         }

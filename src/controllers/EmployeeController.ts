@@ -22,33 +22,34 @@ export class EmployeeController {
         },
     }
 
-    // CRUD - create, read, update, and delete
+    /**
+     * READ one employee
+     * @param req - the HTTP request
+     * @param res - the HTTP response
+     * @param next - callback function
+     */
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
         if (req.params.uuid) {
-            return this.employeeRepo.findOneBy({id: req.params.uuid})
+            return this.employeeRepo.findOneBy({id: req.params.uuid});
         } else {
-            // use js to build the findOptions for sorting and searching
-            // looks like this {where: {lowMoneyDefCon: 3}, order: {favHardDrink: "ASC"}}
-            const findOptions = {where: [], order:{}}
-            const existingColumns = this.employeeRepo.metadata.ownColumns.map(c => c.propertyName)
+            const findOptions = { where: [], order: {} };
+            const existingColumns = this.employeeRepo.metadata.ownColumns.map(c => c.propertyName);
 
-            // const sortByField = existingColumns.includes(req.query.mixology)? req.query.mixology : 'id' // if not sort then use default of id
-            // const sortDirection = req.query.sortorder? "DESC" : "ASC"
-            // findOptions.order[sortByField] = sortDirection
-            // console.log('Order Clause: \n', findOptions.order)
+            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'id';
+            const sortDirection = req.query.sortorder ? "DESC" : "ASC";
+            findOptions.order[sortByField] = sortDirection;
+            console.log('Order Clause: \n', findOptions.order);
 
-            if (req.query.trouve) { // obly add the where clauses if the search query exists
-                for (const  columnName of existingColumns) {
-                    // sytactic sugar - when creating a JS object wiht a dynamic property name use [ ]
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.trouve}%`) })
+            if (req.query.search) { // only add the where clauses if the search query exists
+                for (const columnName of existingColumns) {
+                    findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
                 }
             }
-            console.log('Where Clause: ', findOptions.where)
+            console.log('Where Clause: ', findOptions.where);
             return this.employeeRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
-
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
         if (await this.employeeRepo.existsBy({ id: req.params.uuid })) {
