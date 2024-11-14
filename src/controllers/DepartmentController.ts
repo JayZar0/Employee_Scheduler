@@ -36,12 +36,18 @@ export class DepartmentController {
             const findOptions = {where: [], order:{}}
             const existingColumns = this.departmentRepo.metadata.ownColumns.map(c => c.propertyName)
 
-            if (req.query.where) { // only add the where clauses if the search query exists
-                for (const  columnName of existingColumns) {
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.where}%`) })
+            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'id';
+            const sortDirection = req.query.sortorder ? "DESC" : "ASC";
+            findOptions.order[sortByField] = sortDirection;
+            console.log('Order Clause: \n', findOptions.order);
+
+            if (req.query.search) { // only add the where clauses if the search query exists
+                for (const columnName of existingColumns) {
+                    findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
                 }
             }
-            console.log('Where Clause: ', findOptions.where)
+
+            console.log('Where Clause: ', findOptions.where);
             return this.departmentRepo.find(findOptions); // returns all if there are no other options specified
         }
     }

@@ -50,6 +50,8 @@ export class EmployeeController {
             return this.employeeRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
+
+
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
         if (await this.employeeRepo.existsBy({ id: req.params.uuid })) {
