@@ -5,6 +5,9 @@ import {Shift} from "../entity/Shift";
 import {AppDataSource} from "../data-source";
 import {Like, Repository} from "typeorm";
 import {Controller} from "../decorator/Controller";
+import { ShiftDTO } from "../entity/ShiftDTO";
+import {Employee} from "../entity/Employee";
+import {Department} from "../entity/Department";
 
 @Controller('/shifts')
 export class ShiftController {
@@ -62,18 +65,24 @@ export class ShiftController {
 
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
-        // copy the data we want into the object with all the rules
-        const studentToInsert = Object.assign(new Shift(), req.body)
+        console.log('Request Body:', req.body); // Debugging
 
-        // validate the student with all the data and the rules
-        const violations : ValidationError[] = await validate(studentToInsert, this.validOptions);
+        const shiftDTO = Object.assign(new ShiftDTO(), req.body);
 
-        if (violations.length) { // there are errors
-            res.statusCode = 422 // unprocessable content
-            return violations // these are still ugly - should be cleaned up for teammates
+        const violations: ValidationError[] = await validate(shiftDTO, this.validOptions);
+
+        if (violations.length) {
+            res.statusCode = 422;
+            return res.json(violations);
         } else {
-            res.statusCode = 201 // created
-            return this.shiftRepo.insert(studentToInsert)
+            const shiftToInsert = new Shift();
+            shiftToInsert.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
+            shiftToInsert.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
+            shiftToInsert.startHour = shiftDTO.startHour;
+            shiftToInsert.endHour = shiftDTO.endHour;
+
+            res.statusCode = 201;
+            return res.json(await this.shiftRepo.insert(shiftToInsert));
         }
     }
 
