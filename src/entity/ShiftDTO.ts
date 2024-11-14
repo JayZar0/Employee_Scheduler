@@ -1,5 +1,9 @@
 import { IsInt, Max, Min } from "class-validator";
 
+/*
+    Data transfer object used to map FK's to the entities
+ */
+
 export class ShiftDTO {
     @IsInt()
     employeeID: number;

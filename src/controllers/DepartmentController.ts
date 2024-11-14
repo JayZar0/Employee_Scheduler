@@ -22,26 +22,23 @@ export class DepartmentController {
         }
     }
 
-    // CRUD - create, read, update, and delete
+    /**
+     * READ one department
+     * @param req - the HTTP request
+     * @param res - the HTTP response
+     * @param next - callback function
+     */
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
         if (req.params.uuid) {
             return this.departmentRepo.findOneBy({id: req.params.uuid})
         } else {
-            // use js to build the findOptions for sorting and searching
-            // looks like this {where: {lowMoneyDefCon: 3}, order: {favHardDrink: "ASC"}}
             const findOptions = {where: [], order:{}}
             const existingColumns = this.departmentRepo.metadata.ownColumns.map(c => c.propertyName)
 
-            // const sortByField = existingColumns.includes(req.query.mixology)? req.query.mixology : 'id' // if not sort then use default of id
-            // const sortDirection = req.query.sortorder? "DESC" : "ASC"
-            // findOptions.order[sortByField] = sortDirection
-            // console.log('Order Clause: \n', findOptions.order)
-
-            if (req.query.trouve) { // obly add the where clauses if the search query exists
+            if (req.query.where) { // only add the where clauses if the search query exists
                 for (const  columnName of existingColumns) {
-                    // sytactic sugar - when creating a JS object wiht a dynamic property name use [ ]
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.trouve}%`) })
+                    findOptions.where.push({ [columnName]: Like(`%${req.query.where}%`) })
                 }
             }
             console.log('Where Clause: ', findOptions.where)
@@ -49,6 +46,12 @@ export class DepartmentController {
         }
     }
 
+    /**
+     * DELETE one department
+     * @param req - the HTTP request
+     * @param res - the HTTP response
+     * @param next - callback function
+     */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
         if (await this.departmentRepo.existsBy({ id: req.params.uuid })) {
@@ -60,47 +63,49 @@ export class DepartmentController {
         }
     }
 
+    /**
+     * CREATE a new department
+     * @param req - the HTTP request
+     * @param res - the HTTP response
+     * @param next - callback function
+     */
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
         // copy the data we want into the object with all the rules
         const departmentToCreate = Object.assign(new Department(), req.body)
-
-        // validate the student with all the data and the rules
+        // validate the department with all the data and the rules
         const violations : ValidationError[] = await validate(departmentToCreate, this.validOptions)
-
         if (violations.length) { // there are errors
             res.statusCode = 422 // unprocessable content
-            return violations // these are still ugly - should be cleaned up for teammates
+            return violations
         } else {
             res.statusCode = 201 // created
             return this.departmentRepo.insert(departmentToCreate)
         }
     }
 
+    /**
+     * UPDATE an existing department
+     * @param req - the HTTP request
+     * @param res - the HTTP response
+     * @param next - callback function
+     */
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
-        // to optimize the processor cycles do simple checks first - id. before calling the db
-        // if (req.params.uuid != req.body.id) {
-        //     next()
-        // }
-
-        // ensure student exists
-        const studentToUpdate = await this.departmentRepo.findOneBy({ id:req.params.uuid })
-
-        // NO NEED for OBJECT.assign since the repo will return a student object -already has rules
-        Object.assign(studentToUpdate, req.body)
-
-        // update the student
-        if (!studentToUpdate) {
-            next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
+        // ensure department exists
+        const departmentToUpdate = await this.departmentRepo.findOneBy({ id:req.params.uuid })
+        Object.assign(departmentToUpdate, req.body)
+        // update the department
+        if (!departmentToUpdate) {
+            next() // gets caught by the UMBRELLA code in index.ts to a 404
         } else {
-            //WHENEVER YOU SAVE/UPDATE - VALIDATE
-            const violations : ValidationError[] = await validate(studentToUpdate, this.validOptions)
+            // validate & save
+            const violations : ValidationError[] = await validate(departmentToUpdate, this.validOptions)
             if (violations.length) {
-                res.statusCode = 422 // Unprocessable Content
+                res.statusCode = 422
                 return violations
             } else {
-                return this.departmentRepo.update(req.params.uuid, studentToUpdate)
+                return this.departmentRepo.update(req.params.uuid, departmentToUpdate)
             }
         }
     }
