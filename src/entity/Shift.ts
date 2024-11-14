@@ -13,12 +13,12 @@ export class Shift {
     // This is a foreign key that references the employee working the shift
     @ManyToOne(type => Employee)
     @JoinColumn({ name: "employeeID"})
-    employeeID: Employee
+    workedBy: Employee
 
     // This is a foreign key that references the department assigned to the shift
     @ManyToOne(type => Department)
     @JoinColumn({ name: "departmentID" })
-    departmentID: Department
+    department: Department
 
     @Column({ type: 'int' })
     @Max(23)

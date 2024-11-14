@@ -76,8 +76,8 @@ export class ShiftController {
             return res.json(violations);
         } else {
             const shiftToInsert = new Shift();
-            shiftToInsert.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
-            shiftToInsert.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
+            shiftToInsert.workedBy = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
+            shiftToInsert.department = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
             shiftToInsert.startHour = shiftDTO.startHour;
             shiftToInsert.endHour = shiftDTO.endHour;
 
