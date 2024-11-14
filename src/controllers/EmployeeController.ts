@@ -51,18 +51,29 @@ export class EmployeeController {
         }
     }
 
-
+    /**
+     * DELETE for one employee
+     * @param req - The HTTP request
+     * @param res - The HTTP response
+     * @param next - callback function
+     */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
         if (await this.employeeRepo.existsBy({ id: req.params.uuid })) {
             await this.employeeRepo.delete({ id: req.params.uuid })
             return ''
-            res.statusCode = 204 // Success "no content" don't send any content or browser will complain
+            res.statusCode = 204 // Success "no content"
         } else {
             next(); // let the catchall in index.ts handle the 404
         }
     }
 
+    /**
+     * CREATE Employee
+     * @param req - the HTTP request
+     * @param res - the HTTP response
+     * @param next - callback function
+     */
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
         // copy the data we want into the object with all the rules
@@ -82,22 +93,16 @@ export class EmployeeController {
 
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
-        // to optimize the processor cycles do simple checks first - id. before calling the db
-        // if (req.params.uuid != req.body.id) {
-        //     next()
-        // }
 
-        // ensure student exists
+        // ensure employee exists
         const employeeToUpdate = await this.employeeRepo.findOneBy({ id:req.params.uuid })
-
-        // NO NEED for OBJECT.assign since the repo will return a student object -already has rules
         Object.assign(employeeToUpdate, req.body)
 
-        // update the student
+        // update the employee
         if (!employeeToUpdate) {
             next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
         } else {
-            //WHENEVER YOU SAVE/UPDATE - VALIDATE
+            // validate & save
             const violations : ValidationError[] = await validate(employeeToUpdate, this.validOptions)
             if (violations.length) {
                 res.statusCode = 422 // Unprocessable Content
