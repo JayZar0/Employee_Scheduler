@@ -85,22 +85,22 @@ export class EmployeeController {
         // }
 
         // ensure student exists
-        const studentToUpdate = await this.employeeRepo.findOneBy({ id:req.params.uuid })
+        const employeeToUpdate = await this.employeeRepo.findOneBy({ id:req.params.uuid })
 
         // NO NEED for OBJECT.assign since the repo will return a student object -already has rules
-        Object.assign(studentToUpdate, req.body)
+        Object.assign(employeeToUpdate, req.body)
 
         // update the student
-        if (!studentToUpdate) {
+        if (!employeeToUpdate) {
             next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
         } else {
             //WHENEVER YOU SAVE/UPDATE - VALIDATE
-            const violations : ValidationError[] = await validate(studentToUpdate, this.validOptions)
+            const violations : ValidationError[] = await validate(employeeToUpdate, this.validOptions)
             if (violations.length) {
                 res.statusCode = 422 // Unprocessable Content
                 return violations
             } else {
-                return this.employeeRepo.update(req.params.uuid, studentToUpdate)
+                return this.employeeRepo.update(req.params.uuid, employeeToUpdate)
             }
         }
     }

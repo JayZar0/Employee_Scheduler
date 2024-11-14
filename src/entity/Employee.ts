@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, Max, Min } from "class-validator"
-import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column, OneToOne} from "typeorm"
 
 @Entity()
 export class Employee {
@@ -19,11 +19,11 @@ export class Employee {
     @Column({ type: "int" })
     @IsOptional()
     @Max(40, { message: "The max amount of requested hours of an employee cannot exceed 40" })
-    @Min(3, { message: "The minimum of hours that must be worked is 3 hours in a business week" })
+    @Min(3, { message: "The minimum hours that must be worked in a business week is 3 hours" })
     maxHours: number
 
     // This is going to be a foreign key that references another employee
-    @Column({ type:"nvarchar" })
+    @Column({ type:"int" })
     @OneToOne(type => Employee)
     @IsOptional()
     managedBy: Employee
