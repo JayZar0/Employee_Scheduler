@@ -35,7 +35,8 @@ export class EmployeeController {
             const findOptions = { where: [], order: {} };
             const existingColumns = this.employeeRepo.metadata.ownColumns.map(c => c.propertyName);
 
-            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'id';
+            // last name as default sort order
+            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'lastName';
             const sortDirection = req.query.sortorder ? "DESC" : "ASC";
             findOptions.order[sortByField] = sortDirection;
             console.log('Order Clause: \n', findOptions.order);

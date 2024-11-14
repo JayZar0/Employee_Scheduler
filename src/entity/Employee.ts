@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, Max, Min } from "class-validator"
-import {Entity, PrimaryGeneratedColumn, Column, OneToOne} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "typeorm"
 
 @Entity()
 export class Employee {
@@ -23,8 +23,8 @@ export class Employee {
     maxHours: number
 
     // This is going to be a foreign key that references another employee
-    @Column({ type:"int" })
     @OneToOne(type => Employee)
+    @JoinColumn({name: 'employeeID'})
     @IsOptional()
     managedBy: Employee
 

@@ -40,7 +40,8 @@ export class ShiftController {
             const findOptions = {where: [], order:{}}
             const existingColumns = this.shiftRepo.metadata.ownColumns.map(c => c.propertyName)
 
-            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'id';
+            // start hour as default sort
+            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'startHour';
             const sortDirection = req.query.sortorder ? "DESC" : "ASC";
             findOptions.order[sortByField] = sortDirection;
             console.log('Order Clause: \n', findOptions.order);
