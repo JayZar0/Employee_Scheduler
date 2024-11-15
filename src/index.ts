@@ -1,6 +1,6 @@
 import * as express from "express"
 import * as bodyParser from "body-parser"
-import {NextFunction, Request, Response} from "express"
+import { NextFunction, Request, Response } from "express"
 import { AppDataSource } from "./data-source"
 import { RouteDefinition } from "./decorator/RouteDefinition"
 import * as createError from "http-errors"
@@ -15,7 +15,7 @@ let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED
     origin: /localhost:\d{4,5}$/i,
     allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-    methods: "GET"
+    methods: ""
 }
 
 AppDataSource.initialize().then(async () => {
@@ -23,8 +23,8 @@ AppDataSource.initialize().then(async () => {
     // create express app
     const app = express()
     app.use(bodyParser.json())
-    app.use(cors((req, callback) => {
-            // Authorization should provide if the user is a employee or a manager
+    app.use(cors((req:Request, callback) => {
+        // Authorization should provide if the user is a employee or a manager
         if(req.headers.authorization === 'Bearer MANAGER_KEY') {
             // If the authorized user is a manager give them full privlege
             corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
@@ -32,14 +32,19 @@ AppDataSource.initialize().then(async () => {
             // If the authorized user is a employee give them read access
             corsOptions.methods = "GET"
         } else {
-            corsOptions.methods = ""
+            // If the user is not authorized at all do not give them access
+            corsOptions.methods = null
         }
+
         callback(null, corsOptions)
     }))
 
     app.use((req: Request, res: Response, next: NextFunction) => {
         // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
         // for super secure api server
+        console.log(corsOptions? `Allowed methods based on authorization ${corsOptions.methods}`:
+            'User has no authorization to the application'
+        )
         next()
     })
 
@@ -95,6 +100,6 @@ AppDataSource.initialize().then(async () => {
     const port  = process.env.PORT || 3004
     app.listen(port)
 
-    console.log(`Open http://localhost:${port}/users to see results`)
+    console.log(`Open http://localhost:${port}/employees to see results`)
 
 }).catch(error => console.log(error))
