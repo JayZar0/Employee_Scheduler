@@ -22,23 +22,26 @@ AppDataSource.initialize().then(async () => {
 
     // create express app
     const app = express()
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        // Authorization should provide if the user is a employee or a manager
-        // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
-        // for super secure api server
-        
+    app.use(bodyParser.json())
+    app.use(cors((req, callback) => {
+            // Authorization should provide if the user is a employee or a manager
         if(req.headers.authorization === 'Bearer MANAGER_KEY') {
             // If the authorized user is a manager give them full privlege
             corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
         } else if (req.headers.authorization === 'Bearer EMPLOYEE_KEY') {
             // If the authorized user is a employee give them read access
             corsOptions.methods = "GET"
+        } else {
+            corsOptions.methods = ""
         }
+        callback(null, corsOptions)
+    }))
 
+    app.use((req: Request, res: Response, next: NextFunction) => {
+        // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
+        // for super secure api server
         next()
     })
-    app.use(bodyParser.json())
-    app.use(cors(corsOptions))
 
     app.options('*', cors(corsOptions))
 
