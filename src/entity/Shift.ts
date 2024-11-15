@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm"
 import { Employee } from "./Employee"
 import { Department } from "./Department"
-import { IsOptional, Max, Min } from "class-validator"
+import { IsNotEmpty, IsOptional, Max, Min } from "class-validator"
 
 @Entity()
 export class Shift {
@@ -20,14 +20,20 @@ export class Shift {
     @JoinColumn({ name: "departmentID" })
     department: Department
 
+    @Column({ type: 'date' })
+    @IsNotEmpty({ message: 'Date of shift must be provided' })
+    day:Date
+
     @Column({ type: 'int' })
-    @Max(23)
-    @Min(1)
+    @Max(24, { message: 'Hours cannot be greater than 24 military time' })
+    @Min(1, { message: 'Hours cannot be less than 1 military time' })
+    @IsNotEmpty({ message: 'Starting hour of shift must be provided' })
     startHour: number
 
     @Column({ type: 'int' })
-    @Max(24)
-    @Min(2)
+    @Max(24, { message: 'Hours cannot be greater than 24 military time' })
+    @Min(1, { message: 'Hours cannot be less than 1 military time' })
+    @IsNotEmpty({ message: 'Ending hour of shift must be provided' })
     endHour: number
 
 }
