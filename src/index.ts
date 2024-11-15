@@ -23,7 +23,11 @@ AppDataSource.initialize().then(async () => {
     // create express app
     const app = express()
     app.use(bodyParser.json())
-    app.use(cors((req:Request, callback) => {
+
+    app.use((req: Request, res: Response, next: NextFunction) => {
+        // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
+        // for super secure api server
+
         // Authorization should provide if the user is a employee or a manager
         if(req.headers.authorization === 'Bearer MANAGER_KEY') {
             // If the authorized user is a manager give them full privlege
@@ -33,19 +37,21 @@ AppDataSource.initialize().then(async () => {
             corsOptions.methods = "GET"
         } else {
             // If the user is not authorized at all do not give them access
-            corsOptions.methods = null
+            corsOptions.methods = ""
         }
-
-        callback(null, corsOptions)
-    }))
-
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
-        // for super secure api server
         console.log(corsOptions? `Allowed methods based on authorization ${corsOptions.methods}`:
             'User has no authorization to the application'
         )
         next()
+    })
+
+    app.use((req, res, next) => {
+        // Block any requests to unauthorized users
+        if (!corsOptions.methods.includes(req.method)) {
+            next(createError(403))
+        }
+
+        cors(corsOptions)(req, res, next)
     })
 
     app.options('*', cors(corsOptions))
