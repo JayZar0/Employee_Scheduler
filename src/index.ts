@@ -7,32 +7,38 @@ import * as createError from "http-errors"
 import * as cors from 'cors'
 
 // Entity/Controller imports
-import { Department } from "./entity/Department"
-import { Employee } from "./entity/Employee"
-import { Shift } from "./entity/Shift"
 import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
 
-const corsOptions = {
+let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED
     origin: /localhost:\d{4,5}$/i,
     allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-    methods: "GET,PUT,POST,DELETE,OPTIONS"
+    methods: "GET"
 }
 
 AppDataSource.initialize().then(async () => {
 
     // create express app
     const app = express()
-    app.use(bodyParser.json())
-    app.use(cors(corsOptions))
     app.use((req: Request, res: Response, next: NextFunction) => {
         // Authorization should provide if the user is a employee or a manager
         // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
-        // for super secure api servers
+        // for super secure api server
+        
+        if(req.headers.authorization === 'Bearer MANAGER_KEY') {
+            // If the authorized user is a manager give them full privlege
+            corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
+        } else if (req.headers.authorization === 'Bearer EMPLOYEE_KEY') {
+            // If the authorized user is a employee give them read access
+            corsOptions.methods = "GET"
+        }
+
         next()
     })
+    app.use(bodyParser.json())
+    app.use(cors(corsOptions))
 
     app.options('*', cors(corsOptions))
 
@@ -85,23 +91,6 @@ AppDataSource.initialize().then(async () => {
     // start express server
     const port  = process.env.PORT || 3004
     app.listen(port)
-
-    // insert new users for test
-    // await AppDataSource.manager.save(
-    //     AppDataSource.manager.create(User, {
-    //         firstName: "Timber",
-    //         lastName: "Saw",
-    //         age: 27
-    //     })
-    // )
-
-    // await AppDataSource.manager.save(
-    //     AppDataSource.manager.create(User, {
-    //         firstName: "Phantom",
-    //         lastName: "Assassin",
-    //         age: 24
-    //     })
-    // )
 
     console.log(`Open http://localhost:${port}/users to see results`)
 
