@@ -4,7 +4,7 @@ import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "type
 @Entity()
 export class Employee {
 
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn()
     @IsOptional()
     id: string
 
