@@ -23,9 +23,8 @@ export class Employee {
     maxHours: number
 
     // This is going to be a foreign key that references another employee
-    @OneToOne(type => Employee)
-    @JoinColumn({name: 'employeeID'})
+    @Column({ type: "bool" })
     @IsOptional()
-    managedBy: Employee
+    managedBy: boolean
 
 }
