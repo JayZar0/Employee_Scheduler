@@ -22,11 +22,6 @@ export class Employee {
     @Min(3, { message: "The minimum hours that must be worked in a business week is 3 hours" })
     maxHours: number
 
-    // // This is going to be a foreign key that references another employee
-    // @OneToOne(type => Employee)
-    // @JoinColumn({name: 'employeeID'})
-    // @IsOptional()
-    // managedBy: Employee
     @Column({ type: "boolean", default: false, nullable: true })
     @IsOptional()
     isManager: boolean
