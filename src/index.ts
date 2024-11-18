@@ -11,6 +11,9 @@ import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
 
+let employeeTokens = ['Bearer EMPLOYEE_KEY']
+let managerTokens = ['Bearer MANAGER_KEY']
+
 let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED
     origin: /localhost:\d{4,5}$/i,
@@ -26,10 +29,10 @@ AppDataSource.initialize().then(async () => {
 
     app.use((req: Request, res: Response, next: NextFunction) => {
         // Authorization should provide if the user is a employee or a manager
-        if(req.headers.authorization === 'Bearer MANAGER_KEY') {
+        if(managerTokens.indexOf(req.headers.authorization) != -1) {
             // If the authorized user is a manager give them full privlege
             corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        } else if (req.headers.authorization === 'Bearer EMPLOYEE_KEY') {
+        } else if (employeeTokens.indexOf(req.headers.authorization) != -1) {
             // If the authorized user is a employee give them read access
             corsOptions.methods = "GET"
         } else {
