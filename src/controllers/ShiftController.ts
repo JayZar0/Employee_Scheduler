@@ -84,14 +84,14 @@ export class ShiftController {
     async create(req: Request, res: Response, next: NextFunction) {
         console.log('Request Body:', req.body); // Debugging
 
-        const shiftDTO = Object.assign(new ShiftDTO(), req.body);
-
+        const shiftDTO = Object.assign(new ShiftDTO(), req.body); // this is like an intermediary model
         const violations: ValidationError[] = await validate(shiftDTO, this.validOptions);
 
         if (violations.length) {
             res.statusCode = 422;
             return res.json(violations);
         } else {
+            // map the DTO to the "real" object
             const shiftToInsert = new Shift();
             shiftToInsert.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
             shiftToInsert.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
