@@ -25,6 +25,6 @@ export class Employee {
     // This is going to be a foreign key that references another employee
     @Column({ type: "bool" })
     @IsOptional()
-    managedBy: boolean
+    isManager: boolean
 
 }
