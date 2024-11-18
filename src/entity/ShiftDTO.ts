@@ -1,4 +1,5 @@
-import { IsInt, Max, Min } from "class-validator";
+import {IsInt, IsNotEmpty, Max, Min} from "class-validator";
+import {Column} from "typeorm";
 
 /*
     Data transfer object used to map FK's to the entities
@@ -6,11 +7,14 @@ import { IsInt, Max, Min } from "class-validator";
 
 export class ShiftDTO {
 
-    @IsInt()
+    @IsNotEmpty()
     employeeID: string; // FK
 
     @IsInt()
     departmentID: number; // FK
+
+    @IsNotEmpty()
+    day:Date
 
     @IsInt()
     @Max(23)

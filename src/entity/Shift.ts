@@ -13,12 +13,12 @@ export class Shift {
     // This is a foreign key that references the employee working the shift
     @ManyToOne(type => Employee)
     @JoinColumn({ name: "employeeID"})
-    workedBy: Employee
+    employeeID: Employee
 
     // This is a foreign key that references the department assigned to the shift
     @ManyToOne(type => Department)
     @JoinColumn({ name: "departmentID" })
-    department: Department
+    departmentID: Department
 
     @Column({ type: 'date' })
     @IsNotEmpty({ message: 'Date of shift must be provided' })
