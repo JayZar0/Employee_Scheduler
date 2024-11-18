@@ -25,9 +25,6 @@ AppDataSource.initialize().then(async () => {
     app.use(bodyParser.json())
 
     app.use((req: Request, res: Response, next: NextFunction) => {
-        // YOU CAN ADD MORE RESTRICTIONS like making the X-Requested-With mandatory
-        // for super secure api server
-
         // Authorization should provide if the user is a employee or a manager
         if(req.headers.authorization === 'Bearer MANAGER_KEY') {
             // If the authorized user is a manager give them full privlege
@@ -50,7 +47,6 @@ AppDataSource.initialize().then(async () => {
         if (!corsOptions.methods.includes(req.method)) {
             next(createError(403))
         }
-
         cors(corsOptions)(req, res, next)
     })
 
@@ -58,7 +54,6 @@ AppDataSource.initialize().then(async () => {
 
     // Iterate over all our controllers and register our routes
     const controllers = [
-        // Add other controllers here
         EmployeeController,
         DepartmentController,
         ShiftController
@@ -66,7 +61,6 @@ AppDataSource.initialize().then(async () => {
 
     controllers.forEach((controller) => {
         // This is our instantiated class
-        // eslint-disable-next-line new-cap
         const instance = new controller()
 
         // The prefix saved to our controller
@@ -98,9 +92,6 @@ AppDataSource.initialize().then(async () => {
         res.status(err.status || 500)
         res.json({ error: err.message, status: err.status, stack: err.stack.split(/\s{4,}/) })
     })
-
-    // setup express app here
-    // ...
 
     // start express server
     const port  = process.env.PORT || 3004
