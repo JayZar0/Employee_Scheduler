@@ -35,5 +35,4 @@ export class Shift {
     @Min(1, { message: 'Hours cannot be less than 1 military time' })
     @IsNotEmpty({ message: 'Ending hour of shift must be provided' })
     endHour: number
-
 }

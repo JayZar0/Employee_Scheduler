@@ -33,7 +33,7 @@ export class ShiftController {
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
         if (req.params.uuid) {
-            return this.shiftRepo.findOneBy({id: req.params.uuid})
+            return this.shiftRepo.findOneBy({ id: req.params.uuid})
         } else {
             // use js to build the findOptions for sorting and searching
             // looks like this {where: {lowMoneyDefCon: 3}, order: {favHardDrink: "ASC"}}

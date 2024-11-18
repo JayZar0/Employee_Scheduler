@@ -5,11 +5,12 @@ import { IsInt, Max, Min } from "class-validator";
  */
 
 export class ShiftDTO {
-    @IsInt()
-    employeeID: number;
 
     @IsInt()
-    departmentID: number;
+    employeeID: string; // FK
+
+    @IsInt()
+    departmentID: number; // FK
 
     @IsInt()
     @Max(23)

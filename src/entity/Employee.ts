@@ -27,5 +27,4 @@ export class Employee {
     @JoinColumn({name: 'employeeID'})
     @IsOptional()
     managedBy: Employee
-
 }
