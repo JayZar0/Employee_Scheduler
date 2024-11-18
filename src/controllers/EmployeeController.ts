@@ -105,6 +105,12 @@ export class EmployeeController {
         }
     }
 
+    /**
+     * UPDATE EMPLOYEE
+     * @param req
+     * @param res
+     * @param next
+     */
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
 
