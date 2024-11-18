@@ -39,9 +39,7 @@ AppDataSource.initialize().then(async () => {
             // If the user is not authorized at all do not give them access
             corsOptions.methods = ""
         }
-        console.log(corsOptions? `Allowed methods based on authorization ${corsOptions.methods}`:
-            'User has no authorization to the application'
-        )
+        console.log(`Allowed methods based on authorization ${corsOptions.methods}`)
         next()
     })
 
