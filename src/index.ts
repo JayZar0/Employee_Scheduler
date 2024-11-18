@@ -26,10 +26,10 @@ AppDataSource.initialize().then(async () => {
 
     app.use((req: Request, res: Response, next: NextFunction) => {
         // Authorization should provide if the user is a employee or a manager
-        if(req.headers.authorization === 'Bearer MANAGER_KEY') {
-            // If the authorized user is a manager give them full privlege
+        if((req.headers.authorization).toString().includes('MANAGER')) {
+            // If the authorized user is a manager give them full privilege
             corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        } else if (req.headers.authorization === 'Bearer EMPLOYEE_KEY') {
+        } else if ((req.headers.authorization).toString().includes('EMPLOYEE')) {
             // If the authorized user is a employee give them read access
             corsOptions.methods = "GET"
         } else {

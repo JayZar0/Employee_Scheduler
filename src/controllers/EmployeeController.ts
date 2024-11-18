@@ -84,12 +84,19 @@ export class EmployeeController {
         // validate the student with all the data and the rules
         const violations : ValidationError[] = await validate(employeeToAdd, this.validOptions);
 
+        // create the bearer token
+
+
         if (violations.length) { // there are errors
             res.statusCode = 422 // unprocessable content
-            return violations // these are still ugly - should be cleaned up for teammates
+            return violations
         } else {
             res.statusCode = 201 // created
-            return this.employeeRepo.insert(employeeToAdd)
+            const response = this.employeeRepo.insert(employeeToAdd)
+            console.log((await response).generatedMaps[0].id)
+            const token = employeeToAdd.isManager ? "MANAGER_" + (await response).generatedMaps[0].id :
+                "EMPLOYEE_" + (await response).generatedMaps[0].id;
+            return response
         }
     }
 

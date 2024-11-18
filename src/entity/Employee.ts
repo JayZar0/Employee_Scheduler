@@ -25,4 +25,7 @@ export class Employee {
     @Column({ type: "boolean", default: false, nullable: true })
     @IsOptional()
     isManager: boolean
+
+    @Column({ nullable: true} )
+    bearerToken: string
 }
