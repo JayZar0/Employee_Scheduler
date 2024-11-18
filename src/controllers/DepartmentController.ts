@@ -63,7 +63,7 @@ export class DepartmentController {
         if (await this.departmentRepo.existsBy({ id: req.params.uuid })) {
             await this.departmentRepo.delete({ id: req.params.uuid })
             return ''
-            res.statusCode = 204 // success no content
+            res.statusCode = 204 // success, no response body
         } else {
             next(); // let the catchall in index.ts handle the 404
         }
@@ -77,15 +77,15 @@ export class DepartmentController {
      */
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
-        // copy the data we want into the object with all the rules
+        // create & validate
         const departmentToCreate = Object.assign(new Department(), req.body)
-        // validate the department with all the data and the rules
         const violations : ValidationError[] = await validate(departmentToCreate, this.validOptions)
+
         if (violations.length) { // there are errors
-            res.statusCode = 422 // unprocessable content
+            res.statusCode = 422 // throw an error
             return violations
         } else {
-            res.statusCode = 201 // created
+            res.statusCode = 201 // create it if its good to go
             return this.departmentRepo.insert(departmentToCreate)
         }
     }
@@ -98,14 +98,15 @@ export class DepartmentController {
      */
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
-        // ensure department exists
+
+        // ensure department exists & assign it to an object
         const departmentToUpdate = await this.departmentRepo.findOneBy({ id:req.params.uuid })
         Object.assign(departmentToUpdate, req.body)
-        // update the department
+
         if (!departmentToUpdate) {
-            next() // gets caught by the UMBRELLA code in index.ts to a 404
+            next() // if you can't find it boot out to the catch-all
         } else {
-            // validate & save
+            // validate & save if possible
             const violations : ValidationError[] = await validate(departmentToUpdate, this.validOptions)
             if (violations.length) {
                 res.statusCode = 422
