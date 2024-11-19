@@ -35,8 +35,6 @@ export class ShiftController {
         if (req.params.uuid) {
             return this.shiftRepo.findOneBy({ id: req.params.uuid})
         } else {
-            // use js to build the findOptions for sorting and searching
-            // looks like this {where: {lowMoneyDefCon: 3}, order: {favHardDrink: "ASC"}}
             const findOptions = {where: [], order:{}}
             const existingColumns = this.shiftRepo.metadata.ownColumns.map(c => c.propertyName)
 
@@ -65,6 +63,7 @@ export class ShiftController {
      */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
+        // if it exists, delete it. If not throw error
         if (await this.shiftRepo.existsBy({ id: req.params.uuid })) {
             await this.shiftRepo.delete({ id: req.params.uuid })
             return ''
@@ -84,7 +83,8 @@ export class ShiftController {
     async create(req: Request, res: Response, next: NextFunction) {
         console.log('Request Body:', req.body); // Debugging
 
-        const shiftDTO = Object.assign(new ShiftDTO(), req.body); // this is like an intermediary model
+        // weird FK workaround using an "intermediary" data-transfer-object (DTO)
+        const shiftDTO = Object.assign(new ShiftDTO(), req.body);
         const violations: ValidationError[] = await validate(shiftDTO, this.validOptions);
 
         if (violations.length) {
@@ -93,12 +93,17 @@ export class ShiftController {
         } else {
             // map the DTO to the "real" object
             const shiftToInsert = new Shift();
+
+            // looking for the object that matches the FK's
             shiftToInsert.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
             shiftToInsert.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
+
+            // typical transfer
             shiftToInsert.day = shiftDTO.day;
             shiftToInsert.startHour = shiftDTO.startHour;
             shiftToInsert.endHour = shiftDTO.endHour;
 
+            // good res
             res.statusCode = 201;
             return res.json(await this.shiftRepo.insert(shiftToInsert));
         }
@@ -109,6 +114,8 @@ export class ShiftController {
      * @param req
      * @param res
      * @param next
+     * NOTE: you will not be able to change the FK's
+     * if you assign the wrong emp or dept just delete the shift and make a new one
      */
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {

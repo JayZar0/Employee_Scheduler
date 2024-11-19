@@ -6,7 +6,7 @@ export class Employee {
 
     @PrimaryGeneratedColumn("uuid")
     @IsOptional()
-    id: string
+    id: string // uuid
 
     @Column({ type: "nvarchar" })
     @IsNotEmpty({ message: "The first name is required" })
@@ -27,5 +27,5 @@ export class Employee {
     isManager: boolean
 
     @Column({ nullable: true} )
-    bearerToken: string
+    bearerToken: string // will either start with MANAGER_ or EMPLOYEE_ depending on access level
 }

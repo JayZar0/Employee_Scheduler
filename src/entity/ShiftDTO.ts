@@ -3,6 +3,8 @@ import {Column} from "typeorm";
 
 /*
     Data transfer object used to map FK's to the entities
+    This is the first object that you actually "write to"
+    You then map this to Shift to actually create the FK's
  */
 
 export class ShiftDTO {

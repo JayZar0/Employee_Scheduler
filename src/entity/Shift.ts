@@ -3,6 +3,11 @@ import { Employee } from "./Employee"
 import { Department } from "./Department"
 import { IsNotEmpty, IsOptional, Max, Min } from "class-validator"
 
+/*
+    This is the "real" shift object that actually references other entities with the FK's
+    as opposed to the ShiftDTO which handles the FK id's
+ */
+
 @Entity()
 export class Shift {
 
