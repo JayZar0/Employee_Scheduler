@@ -10,6 +10,7 @@ import * as cors from 'cors'
 import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
+import * as path from "node:path";
 
 let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED
@@ -51,6 +52,9 @@ AppDataSource.initialize().then(async () => {
     })
 
     app.options('*', cors(corsOptions))
+
+    const frontendPath = path.join(__dirname, 'frontend/dist')
+    app.use(express.static(frontendPath))
 
     // Iterate over all our controllers and register our routes
     const controllers = [
