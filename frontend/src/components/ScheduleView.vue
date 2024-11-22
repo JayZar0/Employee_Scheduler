@@ -7,13 +7,26 @@ import Dialog from 'primevue/dialog'
 const isManager = ref(false)
 const date = ref()
 const selectedShift = ref()
-const schedule = ref([
-  { name: 'Gordon', start: '6am', end: '2pm' },
-  { name: 'Paula', start: '8am', end: '4pm' },
-  { name: 'Guy', start: '10am', end: '6pm' },
-  { name: 'Papa', start: '1am', end: '9pm' },
-  { name: 'Tim', start: '5am', end: '9pm' }
-])
+const schedule = ref()
+
+async function getShifts() {
+  const shiftsFromDB = await fetch(`http://localhost:3004/shifts/`, {
+    method: 'GET',
+    headers: {
+      Origin: 'https://localhost:3004/',
+      // 'X-Requested-With':'',
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: 'EMPLOYEE_KEY'
+    }
+  })
+  const data = await shiftsFromDB.json()
+  console.log(data)
+  // dump the students from the db to display on the page
+  schedule.value = data
+}
+
+getShifts()
 </script>
 
 <template>
@@ -26,7 +39,7 @@ const schedule = ref([
         <option value="test">Test Value</option>
         <option value="test2">Test Value#2</option>
       </select>
-      <Listbox v-model="selectedShift" :options="schedule" optionLabel="name" />
+<!--      <Listbox v-model="selectedShift" :options="schedule" optionLabel="name" />-->
     </div>
   </div>
 </template>

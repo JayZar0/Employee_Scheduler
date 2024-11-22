@@ -27,19 +27,17 @@ AppDataSource.initialize().then(async () => {
 
     app.use((req: Request, res: Response, next: NextFunction) => {
         // Authorization should provide if the user is a employee or a manager
-        if((req.headers.authorization).toString().includes('MANAGER')) {
+        if((req.headers.authorization)?.toString()?.includes('MANAGER')) {
             // If the authorized user is a manager give them full privilege
             corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        } else if ((req.headers.authorization).toString().includes('EMPLOYEE')) {
+        } else if ((req.headers.authorization)?.toString()?.includes('EMPLOYEE')) {
             // If the authorized user is a employee give them read access
             corsOptions.methods = "GET"
         } else {
             // If the user is not authorized at all do not give them access
             corsOptions.methods = ""
         }
-        console.log(corsOptions? `Allowed methods based on authorization ${corsOptions.methods}`:
-            'User has no authorization to the application'
-        )
+        console.log(`Allowed methods based on authorization ${corsOptions.methods}: ${req.headers.authorization}`)
         next()
     })
 
