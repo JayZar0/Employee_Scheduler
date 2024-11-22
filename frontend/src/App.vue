@@ -4,8 +4,10 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <nav>
-    <RouterLink to="/">Schedule</RouterLink>
-    <RouterLink to="/employees">Employees</RouterLink>
+    <ul class="navlist">
+      <li><RouterLink to="/">Schedule</RouterLink></li>
+      <li><RouterLink to="/employees">Employees</RouterLink></li>
+    </ul>
   </nav>
   <main>
     <RouterView />
@@ -13,4 +15,14 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style scoped>
+.navlist {
+  list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.navlist > li {
+  margin: 10px;
+}
 </style>

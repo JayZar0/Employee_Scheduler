@@ -1,16 +1,16 @@
-import * as express from "express"
-import * as bodyParser from "body-parser"
-import { NextFunction, Request, Response } from "express"
-import { AppDataSource } from "./data-source"
-import { RouteDefinition } from "./decorator/RouteDefinition"
-import * as createError from "http-errors"
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
+import { NextFunction, Request, Response } from 'express'
+import { AppDataSource } from './data-source'
+import { RouteDefinition } from './decorator/RouteDefinition'
+import * as createError from 'http-errors'
 import * as cors from 'cors'
 
 // Entity/Controller imports
 import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
-import * as path from "node:path";
+import * as path from 'node:path'
 
 let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED

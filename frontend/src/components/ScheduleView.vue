@@ -4,25 +4,22 @@ import { DatePicker } from 'primevue'
 import Listbox from 'primevue/listbox'
 import Dialog from 'primevue/dialog'
 
-const isManager = ref(false)
+const isManager = ref(true)
 const date = ref()
 const selectedShift = ref()
 const schedule = ref()
 
 async function getShifts() {
-  const shiftsFromDB = await fetch(`http://localhost:3004/shifts/`, {
+  const shiftsFromDB = await fetch(`/api/shifts`, {
     method: 'GET',
     headers: {
-      Origin: 'https://localhost:3004/',
-      // 'X-Requested-With':'',
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: 'EMPLOYEE_KEY'
+      Authorization: isManager ? 'MANAGER_KEY': 'EMPLOYEE_KEY'
     }
   })
   const data = await shiftsFromDB.json()
   console.log(data)
-  // dump the students from the db to display on the page
   schedule.value = data
 }
 
@@ -39,7 +36,7 @@ getShifts()
         <option value="test">Test Value</option>
         <option value="test2">Test Value#2</option>
       </select>
-<!--      <Listbox v-model="selectedShift" :options="schedule" optionLabel="name" />-->
+      <Listbox v-model="selectedShift" :options="schedule" optionLabel="startHour" />
     </div>
   </div>
 </template>
