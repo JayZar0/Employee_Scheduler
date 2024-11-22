@@ -56,4 +56,10 @@ const schedule = ref([
   padding: 10px;
   border: 3px solid white;
 }
+
+@media (prefers-color-scheme: light) {
+  .right {
+    border: 3px solid black;
+  }
+}
 </style>
