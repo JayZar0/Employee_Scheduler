@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import LoginView from "./components/LoginView.vue";
 </script>
 
 <template>

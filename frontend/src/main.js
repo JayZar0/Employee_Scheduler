@@ -6,9 +6,10 @@ import './style.css'
 import App from './App.vue'
 import ScheduleView from "./components/ScheduleView.vue";
 import employeeView from "./components/EmployeeView.vue";
+import LoginView from "./components/LoginView.vue";
 
 const routes = [
-    { path: '/', component: ScheduleView },
+    { path: '/', component: LoginView },
     { path: '/employees', component: employeeView}
 ]
 
