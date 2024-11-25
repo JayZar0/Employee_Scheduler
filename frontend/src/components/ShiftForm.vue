@@ -5,42 +5,73 @@ import InputNumber from 'primevue/inputnumber'
 import Listbox from 'primevue/listbox'
 import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button'
+import { formatDate } from '../utils/date-utils.js'
 
 const employee = ref()
 const department = ref()
-const date = ref()
-const start = ref()
-const end = ref()
+
+const newShift = ref({
+  day: formatDate(new Date()),
+  startHour: 1,
+  endHour: 1,
+})
 
 const employees = ref()
 const departments = ref()
 
 async function getEmployees() {
-  const shiftsFromDB = await fetch(`/api/employees`, {
+  const options = {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       Authorization: 'MANAGER_KEY'
     }
-  })
+  }
+  const shiftsFromDB = await fetch(`/api/employees`, options)
   const data = await shiftsFromDB.json()
   console.log(data)
   employees.value = data
 }
 
 async function getDepartments() {
-  const shiftsFromDB = await fetch(`/api/departments`, {
+  const options = {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
       Authorization: 'MANAGER_KEY'
     }
-  })
+  }
+  const shiftsFromDB = await fetch(`/api/departments`, options)
   const data = await shiftsFromDB.json()
   console.log(data)
   departments.value = data
+}
+
+async function createShift() {
+  newShift.value.employeeID = employee.value.id
+  newShift.value.departmentID = department.value.id
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'MANAGER_KEY'
+    },
+    body: JSON.stringify(newShift.value),
+    redirect: 'follow'
+  }
+  try {
+    const result = await fetch(`/api/shifts`, options)
+    console.log(result)
+    if (result.ok) {
+      const data = await result.json()
+      console.log(data)
+    } else {
+      const data = await result.json()
+      console.log(data)
+    }
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 getEmployees()
@@ -48,7 +79,7 @@ getDepartments()
 </script>
 
 <template>
-  <form action="/api/shifts">
+  <form>
     <div class="form-row">
       <label for="employee">Employee:</label>
       <Listbox id="employee" v-model="employee" :options="employees" optionLabel="firstName"
@@ -69,26 +100,26 @@ getDepartments()
 
     <div class="form-row">
       <FloatLabel>
-        <DatePicker id="date" v-model="date" class="calendar" />
+        <DatePicker id="date" v-model="newShift.day" class="calendar" dateFormat="yy-mm-dd" />
         <label for="date">Date</label>
       </FloatLabel>
     </div>
 
     <div class="form-row">
-      <span>Time in military time</span>
       <FloatLabel>
-        <InputNumber id="startTime" v-model="start" :min="1" :max="24" showButtons buttonLayout="horizontal" />
+        <InputNumber id="startTime" v-model="newShift.startHour" :min="1" :max="24" showButtons buttonLayout="horizontal" />
         <label for="startTime">Start</label>
       </FloatLabel>
+    </div>
 
+    <div class="form-row">
       <FloatLabel>
-        <InputNumber id="endTime" v-model="end" :min="1" :max="24" showButtons buttonLayout="horizontal" />
+        <InputNumber id="endTime" v-model="newShift.endHour" :min="1" :max="24" showButtons buttonLayout="horizontal" />
         <label for="endTime">End</label>
       </FloatLabel>
     </div>
 
-
-    <Button label="submit" type="submit" />
+    <Button label="Submit" type="submit" @click="createShift" />
   </form>
 </template>
 
@@ -96,5 +127,6 @@ getDepartments()
 .form-row {
   display: flex;
   flex-direction: column;
+  margin-bottom: 30px;
 }
 </style>

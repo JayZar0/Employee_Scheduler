@@ -6,13 +6,7 @@ import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import ShiftForm from './ShiftForm.vue'
-
-function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, '0'); // Add leading zero
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-  const year = date.getFullYear();
-  return `${year}-${month}-${day}`; // Return formatted date
-}
+import { formatDate } from '../utils/date-utils.js'
 
 const isManager = ref(true)
 const date = ref(new Date())
@@ -42,11 +36,16 @@ getShifts()
 <template>
   <div class="container">
     <div class="left">
-      <Button @click="visible = true" label="Add Shift"
-              :style="{
-                width: 'fit-content'
+      <div class="button-row">
+        <Button @click="visible = true" label="+" id="add"
+                :style="{
+                width: 'fit-content',
+                'margin-bottom': '10px',
+                'margin-right': '10px'
               }"
-      />
+        />
+        <label for="add">Add Shift</label>
+      </div>
       <Dialog v-model:visible="visible" modal header="New Shift"
               :style="{
                  height: 'fit-content',
