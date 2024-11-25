@@ -92,7 +92,7 @@ getShifts()
       >
         <ShiftForm @submit="updateView" />
       </Dialog>
-      <DatePicker v-model="date" inline class="calendar" @valueChange="getShifts" dateFormat="yyyy-MM-dd"
+      <DatePicker v-model="date" inline class="calendar" @valueChange="getShifts" dateFormat="yy-mm-dd"
                   :style="{
                     width: '100%'
                   }"
@@ -104,8 +104,11 @@ getShifts()
         <option value="test2">Test Value#2</option>
       </select>
       <DataTable :value="schedule">
-        <Column field="employeeID" header="Name"></Column>
-        <Column field="departmentID" header="Department"></Column>
+        <template #header>
+          <h5>Shifts on {{formatDate(date)}}</h5>
+        </template>
+        <Column field="employeeID.firstName" header="Name"></Column>
+        <Column field="departmentID.name" header="Department"></Column>
         <Column field="day" header="Date"></Column>
         <Column field="startHour" header="Start"></Column>
         <Column field="endHour" header="End"></Column>
@@ -124,7 +127,6 @@ getShifts()
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: center;
 }
 
 .left {

@@ -9,9 +9,9 @@ import { formatDate } from '../utils/date-utils.js'
 
 const employee = ref()
 const department = ref()
+const date = ref(new Date())
 
 const newShift = ref({
-  day: formatDate(new Date()),
   startHour: 1,
   endHour: 2,
 })
@@ -56,6 +56,7 @@ const emit = defineEmits(['submit'])
 async function createShift() {
   newShift.value.employeeID = employee.value.id
   newShift.value.departmentID = department.value.id
+  newShift.value.day = formatDate(date.value)
   const options = {
     method: 'POST',
     headers: {
@@ -105,7 +106,7 @@ async function createShift() {
 
     <div class="form-row">
       <FloatLabel>
-        <DatePicker id="date" v-model="newShift.day" class="calendar" dateFormat="yy-mm-dd" />
+        <DatePicker id="date" v-model="date" class="calendar" dateFormat="yy-mm-dd" />
         <label for="date">Date</label>
       </FloatLabel>
     </div>
