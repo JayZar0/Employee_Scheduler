@@ -13,11 +13,12 @@ const department = ref()
 const newShift = ref({
   day: formatDate(new Date()),
   startHour: 1,
-  endHour: 1,
+  endHour: 2,
 })
 
 const employees = ref()
 const departments = ref()
+const errs = ref()
 
 async function getEmployees() {
   const options = {
@@ -47,6 +48,11 @@ async function getDepartments() {
   departments.value = data
 }
 
+getEmployees()
+getDepartments()
+
+const emit = defineEmits(['submit'])
+
 async function createShift() {
   newShift.value.employeeID = employee.value.id
   newShift.value.departmentID = department.value.id
@@ -64,6 +70,7 @@ async function createShift() {
     console.log(result)
     if (result.ok) {
       const data = await result.json()
+      emit('submit', 'data has been updated')
       console.log(data)
     } else {
       const data = await result.json()
@@ -74,8 +81,6 @@ async function createShift() {
   }
 }
 
-getEmployees()
-getDepartments()
 </script>
 
 <template>
@@ -107,19 +112,19 @@ getDepartments()
 
     <div class="form-row">
       <FloatLabel>
-        <InputNumber id="startTime" v-model="newShift.startHour" :min="1" :max="24" showButtons buttonLayout="horizontal" />
+        <InputNumber id="startTime" v-model="newShift.startHour" :min="1" :max="23" showButtons buttonLayout="horizontal" />
         <label for="startTime">Start</label>
       </FloatLabel>
     </div>
 
     <div class="form-row">
       <FloatLabel>
-        <InputNumber id="endTime" v-model="newShift.endHour" :min="1" :max="24" showButtons buttonLayout="horizontal" />
+        <InputNumber id="endTime" v-model="newShift.endHour" :min="2" :max="24" showButtons buttonLayout="horizontal" />
         <label for="endTime">End</label>
       </FloatLabel>
     </div>
 
-    <Button label="Submit" type="submit" @click="createShift" />
+    <Button label="Create Shift" type="button" @click="createShift" />
   </form>
 </template>
 
