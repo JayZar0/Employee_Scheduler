@@ -1,10 +1,11 @@
 <script setup>
 import { ref } from 'vue'
-import { DatePicker } from 'primevue'
+import {DatePicker, useToast} from 'primevue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
+import Toast from 'primevue/toast'
 import ShiftForm from './ShiftForm.vue'
 import { formatDate } from '../utils/date-utils.js'
 
@@ -13,35 +14,9 @@ const date = ref(new Date())
 const selectedShift = ref()
 const schedule = ref()
 const visible = ref(false)
+const editing = ref(false)
 
-async function getDepartment(id) {
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: isManager ? 'MANAGER_KEY': 'EMPLOYEE_KEY'
-    }
-  }
-  console.log(id)
-  const shiftsFromDB = await fetch(`/api/departments/${id}`, options)
-  const data = await shiftsFromDB.json()
-  return data.name
-}
-
-async function getName(id) {
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: isManager ? 'MANAGER_KEY': 'EMPLOYEE_KEY'
-    }
-  }
-  const shiftsFromDB = await fetch(`/api/employees/${id}`, options)
-  const data = await shiftsFromDB.json()
-  return data.firstName
-}
+const toast = useToast()
 
 async function getShifts() {
   const options = {
@@ -63,6 +38,12 @@ async function getShifts() {
 function updateView() {
   visible.value = false
   getShifts()
+  toast.add({
+    severity: 'success',
+    summary: 'Success',
+    detail: 'New shift has been added.',
+    life: 3000
+  })
 }
 
 getShifts()
@@ -81,6 +62,7 @@ getShifts()
         />
         <label for="add">Add Shift</label>
       </div>
+      <Toast />
       <Dialog v-model:visible="visible" modal header="New Shift"
               :style="{
                  height: 'fit-content',
@@ -112,6 +94,22 @@ getShifts()
         <Column field="day" header="Date"></Column>
         <Column field="startHour" header="Start"></Column>
         <Column field="endHour" header="End"></Column>
+        <Column>
+          <template #body="slotProps">
+            <Button label="Edit Shift" type="button" @click="editing = true" />
+            <Dialog v-model:visible="editing" modal header="Editing Shift"
+                    :style="{
+                 height: 'fit-content',
+                 width: '30vw',
+                 padding: '10px',
+                 'border-radius': '10px',
+                 filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
+              }"
+            >
+              <ShiftForm selected-shift="this" @submit="updateView" />
+            </Dialog>
+          </template>
+        </Column>
       </DataTable>
     </div>
   </div>

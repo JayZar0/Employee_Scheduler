@@ -7,6 +7,10 @@ import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button'
 import { formatDate } from '../utils/date-utils.js'
 
+const props = defineProps({
+  'selected-shift': Object
+})
+
 const employee = ref()
 const department = ref()
 const date = ref(new Date())
