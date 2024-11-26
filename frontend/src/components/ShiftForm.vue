@@ -9,12 +9,14 @@ import { formatDate } from '../utils/date-utils.js'
 import { useToast } from 'primevue'
 
 const props = defineProps({
-  'shiftid': JSON
+  shiftid: String,
+  edit: Boolean,
+  date: Date
 })
 
 const employee = ref()
 const department = ref()
-const date = ref(new Date())
+const date = ref(props.date)
 
 const newShift = ref({
   startHour: 8,
@@ -58,7 +60,7 @@ async function getDepartments() {
 getEmployees()
 getDepartments()
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'delete'])
 
 async function createShift() {
   newShift.value.employeeID = employee.value.id
@@ -95,6 +97,14 @@ async function createShift() {
   }
 }
 
+function submissionHandler() {
+  if (props.edit) {
+    updateShift()
+  } else {
+    createShift()
+  }
+}
+
 async function updateShift() {
   const options = {
     method: 'PUT',
@@ -106,7 +116,7 @@ async function updateShift() {
     redirect: 'follow'
   }
   try {
-    const result = await fetch(`/api/shifts`, options)
+    const result = await fetch(`/api/shifts/${props?.shiftid}`, options)
     console.log(result)
     if (result.ok) {
       const data = await result.json()
@@ -121,7 +131,36 @@ async function updateShift() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: 'There was an error that has occurred during the upload process. Please try again.',
+      detail: 'There was an error that has occurred during the update process. Please try again.',
+      life: 3000
+    })
+  }
+}
+
+async function deleteShift() {
+  const options = {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'MANAGER_KEY'
+    },
+    redirect: 'follow'
+  }
+  try {
+    const result = await fetch(`/api/shifts/${props.shiftid}`, options)
+    console.log(result)
+    if (result.ok) {
+      emit('delete', 'data has been deleted')
+    } else {
+      errs.value = await result.json()
+      console.log(errs.value)
+    }
+  } catch (e) {
+    console.log(e)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'There was an error that has occurred during the delete process. Please try again.',
       life: 3000
     })
   }
@@ -169,7 +208,9 @@ async function updateShift() {
       </FloatLabel>
     </div>
 
-    <Button label="Create Shift" type="button" @click="createShift" />
+    <Toast />
+    <Button label="Create Shift" type="button" @click="submissionHandler" />
+    <Button v-if="edit" label="Delete Shift" @click="deleteShift" />
   </form>
 </template>
 

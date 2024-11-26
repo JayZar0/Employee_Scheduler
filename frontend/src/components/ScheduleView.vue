@@ -11,10 +11,15 @@ import { formatDate } from '../utils/date-utils.js'
 
 const isManager = ref(true)
 const date = ref(new Date())
-const selectedShift = ref()
 const schedule = ref()
 const visible = ref(false)
 const editing = ref(false)
+const shiftOptions = ref([
+    { label: 'Delete' },
+    { label: 'Edit' }
+])
+const selectedShift = ref()
+const menu = ref()
 
 const toast = useToast()
 
@@ -37,6 +42,7 @@ async function getShifts() {
 
 function updateView() {
   visible.value = false
+  editing.value = false
   getShifts()
   toast.add({
     severity: 'success',
@@ -44,6 +50,21 @@ function updateView() {
     detail: 'New shift has been added.',
     life: 3000
   })
+}
+
+function deleteView() {
+  editing.value = false
+  getShifts()
+  toast.add({
+    severity: 'success',
+    summary: 'Success',
+    detail: 'Shift has been deleted successfully.',
+    life: 3000
+  })
+}
+
+function onShiftClick(e) {
+  menu.value.show(e);
 }
 
 getShifts()
@@ -72,7 +93,7 @@ getShifts()
                  filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
               }"
       >
-        <ShiftForm @submit="updateView" />
+        <ShiftForm @submit="updateView" :date="date" />
       </Dialog>
       <DatePicker v-model="date" inline class="calendar" @valueChange="getShifts" dateFormat="yy-mm-dd"
                   :style="{
@@ -85,7 +106,7 @@ getShifts()
         <option value="test">Test Value</option>
         <option value="test2">Test Value#2</option>
       </select>
-      <DataTable :value="schedule">
+      <DataTable v-model:selection="selectedShift" :value="schedule" @contextmenu="onShiftClick">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
         </template>
@@ -106,11 +127,12 @@ getShifts()
                  filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
               }"
             >
-              <ShiftForm shiftid="id" @submit="updateView" />
+              <ShiftForm :shiftid="`${slotProps.data.id}`" :edit="true" @submit="updateView" @delete="deleteView" />
             </Dialog>
           </template>
         </Column>
       </DataTable>
+      <ContextMenu ref="menu" :model="shiftOptions" />
     </div>
   </div>
 </template>
