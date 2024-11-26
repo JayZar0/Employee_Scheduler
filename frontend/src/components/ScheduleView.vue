@@ -106,7 +106,7 @@ getShifts()
                  filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
               }"
             >
-              <ShiftForm selected-shift="this" @submit="updateView" />
+              <ShiftForm shiftid="id" @submit="updateView" />
             </Dialog>
           </template>
         </Column>

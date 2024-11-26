@@ -6,9 +6,10 @@ import Listbox from 'primevue/listbox'
 import DatePicker from 'primevue/datepicker'
 import Button from 'primevue/button'
 import { formatDate } from '../utils/date-utils.js'
+import { useToast } from 'primevue'
 
 const props = defineProps({
-  'selected-shift': Object
+  'shiftid': JSON
 })
 
 const employee = ref()
@@ -16,13 +17,15 @@ const department = ref()
 const date = ref(new Date())
 
 const newShift = ref({
-  startHour: 1,
-  endHour: 2,
+  startHour: 8,
+  endHour: 16,
 })
 
 const employees = ref()
 const departments = ref()
 const errs = ref()
+
+const toast = useToast()
 
 async function getEmployees() {
   const options = {
@@ -78,14 +81,51 @@ async function createShift() {
       emit('submit', 'data has been updated')
       console.log(data)
     } else {
-      const data = await result.json()
-      console.log(data)
+      errs.value = await result.json()
+      console.log(errs.value)
     }
   } catch (e) {
     console.log(e)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'There was an error that has occurred during the upload process. Please try again.',
+      life: 3000
+    })
   }
 }
 
+async function updateShift() {
+  const options = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'MANAGER_KEY'
+    },
+    body: JSON.stringify(newShift.value),
+    redirect: 'follow'
+  }
+  try {
+    const result = await fetch(`/api/shifts`, options)
+    console.log(result)
+    if (result.ok) {
+      const data = await result.json()
+      emit('submit', 'data has been updated')
+      console.log(data)
+    } else {
+      errs.value = await result.json()
+      console.log(errs.value)
+    }
+  } catch (e) {
+    console.log(e)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'There was an error that has occurred during the upload process. Please try again.',
+      life: 3000
+    })
+  }
+}
 </script>
 
 <template>
