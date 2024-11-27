@@ -11,7 +11,8 @@ import { useToast } from 'primevue'
 const props = defineProps({
   shiftid: String,
   edit: Boolean,
-  date: Date
+  date: Date,
+  shift: Object
 })
 
 const employee = ref()
@@ -19,8 +20,8 @@ const department = ref()
 const date = ref(props.date)
 
 const newShift = ref({
-  startHour: 8,
-  endHour: 16,
+  startHour: props.shift?.startHour ? props.shift.startHour: 8,
+  endHour: props.shift?.endHour ? props.shift.endHour: 16,
 })
 
 const employees = ref()
@@ -219,5 +220,9 @@ async function deleteShift() {
   display: flex;
   flex-direction: column;
   margin-bottom: 30px;
+}
+
+Button {
+  margin-right: 10px;
 }
 </style>

@@ -12,14 +12,8 @@ import { formatDate } from '../utils/date-utils.js'
 const isManager = ref(true)
 const date = ref(new Date())
 const schedule = ref()
-const visible = ref(false)
+const create = ref(false)
 const editing = ref(false)
-const shiftOptions = ref([
-    { label: 'Delete' },
-    { label: 'Edit' }
-])
-const selectedShift = ref()
-const menu = ref()
 
 const toast = useToast()
 
@@ -40,14 +34,24 @@ async function getShifts() {
   schedule.value = data
 }
 
-function updateView() {
-  visible.value = false
-  editing.value = false
+function addView() {
+  create.value = false
   getShifts()
   toast.add({
     severity: 'success',
     summary: 'Success',
     detail: 'New shift has been added.',
+    life: 3000
+  })
+}
+
+function updateView() {
+  editing.value = false
+  getShifts()
+  toast.add({
+    severity: 'success',
+    summary: 'Success',
+    detail: 'Shift has been updated successfully.',
     life: 3000
   })
 }
@@ -63,7 +67,7 @@ function deleteView() {
   })
 }
 
-function onShiftClick(e) {
+function onRightClick(e) {
   menu.value.show(e);
 }
 
@@ -74,7 +78,7 @@ getShifts()
   <div class="container">
     <div class="left">
       <div class="button-row">
-        <Button @click="visible = true" label="+" id="add"
+        <Button @click="create = true" label="+" id="add"
                 :style="{
                 width: 'fit-content',
                 'margin-bottom': '10px',
@@ -84,16 +88,16 @@ getShifts()
         <label for="add">Add Shift</label>
       </div>
       <Toast />
-      <Dialog v-model:visible="visible" modal header="New Shift"
+      <Dialog v-model:visible="create" modal header="New Shift"
               :style="{
                  height: 'fit-content',
-                 width: '30vw',
+                 width: 'fit-content',
                  padding: '10px',
                  'border-radius': '10px',
                  filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
               }"
       >
-        <ShiftForm @submit="updateView" :date="date" />
+        <ShiftForm @submit="addView" :date="date" />
       </Dialog>
       <DatePicker v-model="date" inline class="calendar" @valueChange="getShifts" dateFormat="yy-mm-dd"
                   :style="{
@@ -106,7 +110,7 @@ getShifts()
         <option value="test">Test Value</option>
         <option value="test2">Test Value#2</option>
       </select>
-      <DataTable v-model:selection="selectedShift" :value="schedule" @contextmenu="onShiftClick">
+      <DataTable :value="schedule">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
         </template>
@@ -127,12 +131,12 @@ getShifts()
                  filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
               }"
             >
-              <ShiftForm :shiftid="`${slotProps.data.id}`" :edit="true" @submit="updateView" @delete="deleteView" />
+              <ShiftForm :shiftid="slotProps.data.id" :date="slotProps.data.day" :shift="slotProps.data" :edit="true" @submit="updateView" @delete="deleteView" />
             </Dialog>
           </template>
         </Column>
       </DataTable>
-      <ContextMenu ref="menu" :model="shiftOptions" />
+<!--      <ContextMenu ref="menu" :model="shiftOptions" />-->
     </div>
   </div>
 </template>
