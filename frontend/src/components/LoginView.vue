@@ -5,7 +5,6 @@
 
 import { ref } from 'vue';
 import { zodResolver } from '@primeuix/forms/resolvers/zod';
-import { useToast } from "primevue/usetoast";
 import { z } from 'zod';
 import Password from 'primevue/password';
 import Form from '@primevue/forms/form';
@@ -13,12 +12,6 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InvalidPasswordView from './InvalidPassword.vue'
 import InvalidEmailView from './InvalidEmailView.vue'
-
-const toast = useToast();
-const initialValues = ref({
-  password: '',
-  email: ''
-});
 
 // validation for the email & password
 const emailValidation = z
@@ -37,10 +30,12 @@ const resolver = ref(zodResolver(
     })
 ));
 
+// on submit function
 const onFormSubmit = ({ valid }) => {
  console.log("Login submitted");
 
-  // look up email in DB and show invalid email modal if it doesn't exist
+  // try to GET the user based on their email
+
 
   //TODO: check the password against the stored password for the person with that email
 
@@ -48,10 +43,9 @@ const onFormSubmit = ({ valid }) => {
   // if invalid - show invalid modal
 
   //TODO: check password against a plaintext password for the user in the database
-
-
-
 };
+
+
 </script>
 
 <template>
