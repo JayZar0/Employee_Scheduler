@@ -49,6 +49,9 @@ export class ShiftController {
                     findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
                 }
             }
+            if (req.query.deptfilter) {
+                findOptions.where.push({ departmentID: Like(`%${req.query.deptFilter}%`) })
+            }
 
             console.log('Where Clause: ', findOptions.where)
             return this.shiftRepo.find(findOptions); // returns all if there are no other options specified
@@ -122,19 +125,31 @@ export class ShiftController {
 
         // ensure shift exists
         const shiftToAssign = await this.shiftRepo.findOneBy({ id:req.params.uuid })
-        Object.assign(shiftToAssign, req.body)
+        const shiftDTO = Object.assign(shiftToAssign, req.body)
+        // map the DTO to the "real" object
+        const shiftToUpdate = new Shift();
+
+        // looking for the object that matches the FK's
+        shiftToUpdate.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
+        shiftToUpdate.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
+
+        // typical transfer
+        shiftToUpdate.id = shiftDTO.id;
+        shiftToUpdate.day = shiftDTO.day;
+        shiftToUpdate.startHour = shiftDTO.startHour;
+        shiftToUpdate.endHour = shiftDTO.endHour;
 
         // update the shift
-        if (!shiftToAssign) {
+        if (!shiftToUpdate) {
             next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
         } else {
             // validate & save
-            const violations : ValidationError[] = await validate(shiftToAssign, this.validOptions)
+            const violations : ValidationError[] = await validate(shiftToUpdate, this.validOptions)
             if (violations.length) {
                 res.statusCode = 422 // Unprocessable Content
                 return violations
             } else {
-                return this.shiftRepo.update(req.params.uuid, shiftToAssign)
+                return this.shiftRepo.update(req.params.uuid, shiftToUpdate)
             }
         }
     }

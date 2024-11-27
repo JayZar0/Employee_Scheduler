@@ -15,8 +15,8 @@ const props = defineProps({
   shift: Object
 })
 
-const employee = ref()
-const department = ref()
+const employee = ref(props.shift?.employeeID)
+const department = ref(props.shift?.departmentID)
 const date = ref(props.date)
 
 const newShift = ref({
@@ -107,6 +107,9 @@ function submissionHandler() {
 }
 
 async function updateShift() {
+  newShift.value.employeeID = employee.value.id
+  newShift.value.departmentID = department.value.id
+  newShift.value.day = formatDate(date.value)
   const options = {
     method: 'PUT',
     headers: {
@@ -210,7 +213,7 @@ async function deleteShift() {
     </div>
 
     <Toast />
-    <Button label="Create Shift" type="button" @click="submissionHandler" />
+    <Button :label="edit ? 'Update Shift':'Create Shift'" type="button" @click="submissionHandler" />
     <Button v-if="edit" label="Delete Shift" @click="deleteShift" />
   </form>
 </template>

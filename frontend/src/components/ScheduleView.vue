@@ -6,14 +6,17 @@ import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Toast from 'primevue/toast'
+import Select from 'primevue/select'
 import ShiftForm from './ShiftForm.vue'
-import { formatDate } from '../utils/date-utils.js'
+import { formatDate, formatTime } from '../utils/date-utils.js'
 
 const isManager = ref(true)
 const date = ref(new Date())
 const schedule = ref()
 const create = ref(false)
 const editing = ref(false)
+const selectedShift = ref()
+const departments = ref()
 
 const toast = useToast()
 
@@ -32,6 +35,19 @@ async function getShifts() {
   const data = await shiftsFromDB.json()
   console.log(data)
   schedule.value = data
+}
+
+async function getDepartments() {
+  const options = {
+    method: 'GET',
+    headers: {
+      Authorization: 'MANAGER_KEY'
+    }
+  }
+  const shiftsFromDB = await fetch(`/api/departments`, options)
+  const data = await shiftsFromDB.json()
+  console.log(data)
+  departments.value = data
 }
 
 function addView() {
@@ -67,17 +83,14 @@ function deleteView() {
   })
 }
 
-function onRightClick(e) {
-  menu.value.show(e);
-}
-
 getShifts()
+getDepartments()
 </script>
 
 <template>
   <div class="container">
     <div class="left">
-      <div class="button-row">
+      <div class="button-row" v-if="isManager">
         <Button @click="create = true" label="+" id="add"
                 :style="{
                 width: 'fit-content',
@@ -88,7 +101,7 @@ getShifts()
         <label for="add">Add Shift</label>
       </div>
       <Toast />
-      <Dialog v-model:visible="create" modal header="New Shift"
+      <Dialog v-model:visible="create" modal header="New Shift" @hide="create = false"
               :style="{
                  height: 'fit-content',
                  width: 'fit-content',
@@ -106,10 +119,8 @@ getShifts()
       />
     </div>
     <div class="right">
-      <select name="filter" id="filter">
-        <option value="test">Test Value</option>
-        <option value="test2">Test Value#2</option>
-      </select>
+      <Select name="filter" id="filter" :options="departments"
+              optionLabel="name" placeholder="Department Filter" showClear />
       <DataTable :value="schedule">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
@@ -117,12 +128,23 @@ getShifts()
         <Column field="employeeID.firstName" header="Name"></Column>
         <Column field="departmentID.name" header="Department"></Column>
         <Column field="day" header="Date"></Column>
-        <Column field="startHour" header="Start"></Column>
-        <Column field="endHour" header="End"></Column>
-        <Column>
+        <Column header="Start">
           <template #body="slotProps">
-            <Button label="Edit Shift" type="button" @click="editing = true" />
-            <Dialog v-model:visible="editing" modal header="Editing Shift"
+            {{formatTime(slotProps.data.startHour)}}
+          </template>
+        </Column>
+        <Column header="End">
+          <template #body="slotProps">
+            {{formatTime(slotProps.data.endHour)}}
+          </template>
+        </Column>
+        <Column v-if="isManager">
+          <template #body="slotProps">
+            <Button label="Edit Shift" type="button" @click="() => {
+              editing = true
+              selectedShift = slotProps.data
+            }" />
+            <Dialog v-model:visible="editing" modal header="Editing Shift" @hide="editing = false"
                     :style="{
                  height: 'fit-content',
                  width: '30vw',
@@ -131,7 +153,7 @@ getShifts()
                  filter: 'drop-shadow(0 0 0.75rem rgba(0, 255, 33, 0.25))'
               }"
             >
-              <ShiftForm :shiftid="slotProps.data.id" :date="slotProps.data.day" :shift="slotProps.data" :edit="true" @submit="updateView" @delete="deleteView" />
+              <ShiftForm :shiftid="selectedShift.id" :date="date" :shift="selectedShift" :edit="true" @submit="updateView" @delete="deleteView" />
             </Dialog>
           </template>
         </Column>
