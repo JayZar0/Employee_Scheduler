@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, Max, Min } from "class-validator"
+import {IsEmail, IsNotEmpty, IsOptional, Max, Min} from "class-validator"
 import {Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn} from "typeorm"
 
 @Entity()
@@ -7,6 +7,15 @@ export class Employee {
     @PrimaryGeneratedColumn("uuid")
     @IsOptional()
     id: string // uuid
+
+    @Column({ type: "varchar", unique: true })
+    @IsNotEmpty({ message: "Email is required" })
+    @IsEmail()
+    email: string
+
+    @Column({ type: "varchar" })
+    @IsNotEmpty({ message: "Password is required" })
+    password: string
 
     @Column({ type: "nvarchar" })
     @IsNotEmpty({ message: "The first name is required" })
