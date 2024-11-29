@@ -4,25 +4,21 @@
  */
 
 import Dialog from 'primevue/dialog';
-
-
 import { ref } from "vue";
+import { string } from "zod";
 
 const visible = ref(true);
-//TODO: have this default false but change to true when the password is invalid
-const email = "hardcoded@email.com";
-
+const props = defineProps({
+  email: string // this will be coming from the login component
+})
 
 </script>
+
 
 <template>
 
   <Dialog v-model:visible="visible" modal header="Invalid Password" :style="{ width: '25rem' }">
-    <span class="text-surface-500 dark:text-surface-400 block mb-8">Incorrect password for {{email}}</span>
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">Incorrect password for {{ props.email }}</span>
   </Dialog>
 
 </template>
-
-<style scoped>
-
-</style>

@@ -4,7 +4,7 @@
     This component is used for logging in with an email address and password
  */
 
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 import { zodResolver } from '@primeuix/forms/resolvers/zod';
 import { z } from 'zod';
 import Password from 'primevue/password';
@@ -14,15 +14,19 @@ import InputText from 'primevue/inputtext';
 import InvalidPasswordView from './InvalidPassword.vue'
 import InvalidEmailView from './InvalidEmailView.vue'
 
-// References to email and password
-const email = ref('');
-const password = ref('');
+const email = ref(''); // bound to entered email
+const password = ref(''); // bound to entered password
+const invalidPasswordVisible = ref(false); // toggles on and off the invalid password dialog
+const invalidEmailVisible = ref(false); // toggles on and off the invalid email dialog
 
-// Visible properties for the error messages
-const invalidPasswordVisible = ref(false);
-const invalidEmailVisible = ref(false);
+// define the email which we will emit to other components
+const emit = defineEmits(['emitEmail']);
 
-// Validation for the email & password
+function emitEmail() {
+  emit('emitEmail', email.value);
+}
+
+// Validation in the UI for the email & password
 const emailValidation = z
                         .string()
                         .min(1, { message: 'Email is required' })
@@ -42,9 +46,8 @@ const resolver = ref(zodResolver(
 ));
 
 /**
- * Given a valid, existing email we check that the password matches what is stored in the DB
- * @param email the email of the user logging in
- * @param password the password the user is trying to log in with
+ * Given a valid, existing, email we check that the password matches what is stored in the DB
+ * @param emp the employee that they are trying to log in as (corresponds to the entered email)
  */
 function validatePassword(emp) {
   // check the entered password against the stored password for this email
@@ -53,7 +56,7 @@ function validatePassword(emp) {
 
 /**
  * Searches the DB for a user with the email provided in the login screen
- * @param email the email address that the user is trying to login with
+ * @param email the email address that the user is trying to log in with
  * @returns {Promise<void>}
  */
 function getEmployeeByEmail(email) {
@@ -84,16 +87,14 @@ function authenticate() {
       .then(matchedEmp => {
         // let's see if there is an employee with that email
         if (matchedEmp) {
-          // check the entered password vs. the stored password
           if (validatePassword(matchedEmp)) {
-            // redirect if it matches
+            // redirect if password matches
             // TODO: redirect
           }
-          // show password error dialog if it doesn't match what is in the DB
+          // show password error dialog if password is wrong
           else {
             invalidPasswordVisible.value = true;
           }
-
         }
         // if no emp is found with that email show appropriate error dialog
         else {
@@ -103,13 +104,14 @@ function authenticate() {
       });
 }
 
-
 /**
  * On submit authenticates the user trying to login
  */
 const onFormSubmit = () => {
+  emitEmail(); // send the email to the dialog components so they can use it in their messages
   authenticate(); // look up the users credentials, give appropriate bearer token or alert them of error
 };
+
 </script>
 
 
