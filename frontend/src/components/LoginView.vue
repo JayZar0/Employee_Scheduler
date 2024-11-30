@@ -11,8 +11,8 @@ import Password from 'primevue/password';
 import Form from '@primevue/forms/form';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import InvalidPasswordView from './InvalidPassword.vue'
-import InvalidEmailView from './InvalidEmailView.vue'
+import InvalidPasswordPopup from "./InvalidPasswordPopup.vue";
+import InvalidEmailPopup from "./InvalidEmailPopup.vue";
 
 const email = ref(''); // bound to entered email
 const password = ref(''); // bound to entered password
@@ -143,10 +143,10 @@ const onFormSubmit = () => {
   </Form>
 
   <!--Shown if an invalid password is entered -->
-  <InvalidPasswordView v-model:visible="invalidPasswordVisible" :email="email"/>
+  <InvalidPasswordPopup v-model:visible="invalidPasswordVisible" :email="email"/>
 
   <!--Shown if an email that doesn't correspond to an employee is entered-->
-  <InvalidEmailView v-model:visible="invalidEmailVisible"/>
+  <InvalidEmailPopup v-model:visible="invalidEmailVisible" :email="email"/>
 </template>
 
 
