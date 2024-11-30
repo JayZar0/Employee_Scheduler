@@ -10,10 +10,13 @@ import App from './App.vue'
 import ScheduleView from "./components/ScheduleView.vue";
 import employeeView from "./components/EmployeeView.vue";
 import LoginView from "./components/LoginView.vue";
+import ManagerView from "./components/ManagerView.vue";
 
 const routes = [
     { path: '/', component: LoginView },
-    { path: '/employees', component: employeeView}
+    { path: '/employees', component: employeeView },
+    { path: '/managers', component: ManagerView },
+    { path: '/schedule', component: ScheduleView }
 ]
 
 const router = createRouter({

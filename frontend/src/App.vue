@@ -5,7 +5,7 @@ import LoginView from "./components/LoginView.vue";
 
 <template>
   <nav>
-    <RouterLink to="/">Schedule</RouterLink>
+    <RouterLink to="/schedule">Schedule</RouterLink>
     <RouterLink to="/employees">Employees</RouterLink>
   </nav>
   <main>

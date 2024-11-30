@@ -13,15 +13,19 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InvalidPasswordPopup from "./InvalidPasswordPopup.vue";
 import InvalidEmailPopup from "./InvalidEmailPopup.vue";
+import { useRouter } from 'vue-router';
 
+// ref variables
 const email = ref(''); // bound to entered email
 const password = ref(''); // bound to entered password
 const invalidPasswordVisible = ref(false); // toggles on and off the invalid password dialog
 const invalidEmailVisible = ref(false); // toggles on and off the invalid email dialog
+const router = useRouter();
 
 // define the email which we will emit to other components
 const emit = defineEmits(['emitEmail']);
 
+// emitting the email entered which will go to popups
 function emitEmail() {
   emit('emitEmail',
       { email : email.value });
@@ -61,8 +65,6 @@ function validatePassword(emp) {
  * @returns {Promise<void>}
  */
 function getEmployeeByEmail(email) {
-
-  // define options object for getting the employees
   const options = {
     method: 'GET',
     headers: {
@@ -72,7 +74,7 @@ function getEmployeeByEmail(email) {
     }
   }
 
-  // Let's search for the employee in the database given the email entered
+  // search for the employee in the database given the email entered
   return fetch(`api/employees?search=${email}`, options)
       .then(response => response.json())
       // emp will be in an array, pull out emp object or return null if none is found
@@ -80,33 +82,39 @@ function getEmployeeByEmail(email) {
 }
 
 /**
+ * Helper function determines where the user should go after login
+ * @param employee
+ */
+function redirect(employee) {
+  if (employee.isManager) {
+    router.push('/managers'); // take managers to splash screen
+  } else {
+    router.push('/schedule'); // emps go directly to schedule
+  }
+}
+
+/**
  * Method for checking if the email and password match an employee in the DB
  */
 function authenticate() {
-  // try to look up the employee, this will be async
-  const matchedEmp = getEmployeeByEmail(email.value) // this uses the email ref
+  getEmployeeByEmail(email.value) // look in DB for emp with provided email
       .then(matchedEmp => {
-        // let's see if there is an employee with that email
         if (matchedEmp) {
-          if (validatePassword(matchedEmp)) {
-            // redirect if password matches
-            // TODO: redirect
+          if (validatePassword(matchedEmp)) { // valid login, give them bearer token and redirect
+            localStorage.setItem('bearerToken', matchedEmp.bearerToken);
+            redirect(matchedEmp);
           }
-          // show password error dialog if password is wrong
-          else {
+          else { // show password error dialog if password is wrong
             invalidPasswordVisible.value = true;
           }
-        }
-        // if no emp is found with that email show appropriate error dialog
-        else {
+        } else { // if no emp is found with that email show appropriate error dialog
           invalidEmailVisible.value = true;
-          //TODO: WE NEED TO PASS email TO THIS COMPONENT
         }
       });
 }
 
 /**
- * On submit authenticates the user trying to login
+ * On submit authenticates the user trying to log in
  */
 const onFormSubmit = () => {
   emitEmail(); // send the email to the dialog components so they can use it in their messages
@@ -117,9 +125,9 @@ const onFormSubmit = () => {
 
 
 <template>
-  <!-- Login form using email and password -->
   <h2>Login</h2>
 
+  <!-- Login form using email and password -->
   <Form v-slot="$form" :resolver="resolver" :initialValues="initialValues" @submit="onFormSubmit" class="flex flex-col gap-4 w-full sm:w-64 items-center">
     <div class="flex flex-col gap-1">
       <div class="input-container">
@@ -138,8 +146,9 @@ const onFormSubmit = () => {
       </div>
 
     </div>
+
     <!-- Submit button triggers authentication -->
-    <Button type="submit" severity="primary" label="Submit" />
+    <Button type="submit" severity="info" label="Submit" />
   </Form>
 
   <!--Shown if an invalid password is entered -->
@@ -147,6 +156,7 @@ const onFormSubmit = () => {
 
   <!--Shown if an email that doesn't correspond to an employee is entered-->
   <InvalidEmailPopup v-model:visible="invalidEmailVisible" :email="email"/>
+
 </template>
 
 

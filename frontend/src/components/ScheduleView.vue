@@ -4,7 +4,6 @@ import { DatePicker } from 'primevue'
 import Listbox from 'primevue/listbox'
 import Dialog from 'primevue/dialog'
 
-const isManager = ref(false)
 const date = ref()
 const selectedShift = ref()
 const schedule = ref([
