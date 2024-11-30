@@ -23,7 +23,8 @@ const invalidEmailVisible = ref(false); // toggles on and off the invalid email 
 const emit = defineEmits(['emitEmail']);
 
 function emitEmail() {
-  emit('emitEmail', email.value);
+  emit('emitEmail',
+      { email : email.value });
 }
 
 // Validation in the UI for the email & password
@@ -142,7 +143,7 @@ const onFormSubmit = () => {
   </Form>
 
   <!--Shown if an invalid password is entered -->
-  <InvalidPasswordView v-model:visible="invalidPasswordVisible"/>
+  <InvalidPasswordView v-model:visible="invalidPasswordVisible" :email="email"/>
 
   <!--Shown if an email that doesn't correspond to an employee is entered-->
   <InvalidEmailView v-model:visible="invalidEmailVisible"/>

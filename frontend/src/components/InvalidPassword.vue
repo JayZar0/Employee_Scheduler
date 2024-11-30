@@ -8,6 +8,7 @@ import { ref } from "vue";
 import { string } from "zod";
 
 const visible = ref(true);
+const email = ref('');
 const props = defineProps({
   email: string // this will be coming from the login component
 })
