@@ -16,6 +16,7 @@ export default createStore({
     actions: {
         logout({ commit }, router) {
             commit('setLoggedIn', false); // update state
+            commit('setManager', false); // remove privilege
             localStorage.removeItem('bearerToken'); // remove token
             router.push('/');
         }, login( { commit }, employee) {
