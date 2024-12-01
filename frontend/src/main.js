@@ -3,8 +3,9 @@ import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice';
 import Aura from '@primevue/themes/aura'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import './style.css'
 import 'primeicons/primeicons.css';
+import './style.css'
+import store from './store';
 
 import App from './App.vue'
 import ScheduleView from "./components/ScheduleView.vue";
@@ -26,7 +27,7 @@ const router = createRouter({
 
 const app = createApp(App)
 
-app.use(router)
+app.use(router).use(store);
 app.use(PrimeVue, {
     theme: {
         preset: Aura
