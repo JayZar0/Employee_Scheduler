@@ -14,6 +14,7 @@ import InputText from 'primevue/inputtext';
 import InvalidPasswordPopup from "./InvalidPasswordPopup.vue";
 import InvalidEmailPopup from "./InvalidEmailPopup.vue";
 import { useRouter } from 'vue-router';
+import { useStore } from "vuex";
 
 // ref variables
 const email = ref(''); // bound to entered email
@@ -21,6 +22,7 @@ const password = ref(''); // bound to entered password
 const invalidPasswordVisible = ref(false); // toggles on and off the invalid password dialog
 const invalidEmailVisible = ref(false); // toggles on and off the invalid email dialog
 const router = useRouter();
+const store = useStore();
 
 // define the email which we will emit to other components
 const emit = defineEmits(['emitEmail']);
@@ -83,10 +85,9 @@ function getEmployeeByEmail(email) {
 
 /**
  * Helper function determines where the user should go after login
- * @param employee
  */
-function redirect(employee) {
-  if (employee.isManager) {
+function redirect() {
+  if (store.state.isManager) {
     router.push('/managers'); // take managers to splash screen
   } else {
     router.push('/schedule'); // emps go directly to schedule
@@ -102,7 +103,8 @@ function authenticate() {
         if (matchedEmp) {
           if (validatePassword(matchedEmp)) { // valid login, give them bearer token and redirect
             localStorage.setItem('bearerToken', matchedEmp.bearerToken);
-            redirect(matchedEmp);
+            store.dispatch('login', matchedEmp); // login globally
+            redirect(); // will redirect according to level of access
           }
           else { // show password error dialog if password is wrong
             invalidPasswordVisible.value = true;
@@ -118,7 +120,7 @@ function authenticate() {
  */
 const onFormSubmit = () => {
   emitEmail(); // send the email to the dialog components so they can use it in their messages
-  authenticate(); // look up the users credentials, give appropriate bearer token or alert them of error
+  authenticate() // look up the users credentials, give appropriate bearer token or alert them of error
 };
 
 </script>
@@ -160,7 +162,7 @@ const onFormSubmit = () => {
 </template>
 
 
-<style>
+<style scoped>
 .input-container {
   width: 200px; /* Adjust the width as needed */
   display: flex;

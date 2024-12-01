@@ -32,10 +32,8 @@ function getEmployeeByToken() {
  */
 onMounted( () => {
   getEmployeeByToken().then(matchedEmp => {
-    console.log(matchedEmp.email);
     emp.value = matchedEmp;
   })
-
 });
 
 /**

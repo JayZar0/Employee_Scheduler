@@ -1,32 +1,25 @@
-<script>
-
-/*
-  Logout mixin used to log a user out from any interface
-  */
-
+<script setup>
 import Button from "primevue/button";
 import { useStore } from "vuex";
+import { useRouter } from 'vue-router';
 
+// Access Vuex store
+const store = useStore();
+const router = useRouter();
 
-export default {
-  components: {Button},
-  methods: {
-    useStore,
-    logout() {
-      console.log('Logging out...');
-      // Add your logout logic here, such as clearing the token and redirecting the user
-      //localStorage.removeItem('bearerToken');
-      // If you're using Vuex, you can dispatch a logout action
-      // this.$store.dispatch('logout');
-    }
-  }
+// Define the logout method
+function logout() {
+  store.dispatch('logout', router);  // Dispatch the logout action in Vuex
+  // Optionally, redirect the user or perform any other logic here
 }
-
 
 </script>
 
 <template>
-  <Button v-if="useStore().state.isLoggedIn" severity="danger" class="fixedbottom btnLogout" @click="logout">Log Out</Button>
+  <!-- Display the logout button only if the user is logged in -->
+  <Button v-if="store.state.isLoggedIn" severity="danger" class="fixedbottom btnLogout" @click="logout">
+    Log Out
+  </Button>
 </template>
 
 <style scoped>

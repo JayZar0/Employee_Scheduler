@@ -1,26 +1,10 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import ApplicationTabs from './components/ApplicationTabs.vue'
-import { onMounted, ref } from "vue";
-import Button from "primevue/button";
 import LogoutButton from "./components/LogoutButton.vue";
+import { useStore } from "vuex";
 
-// The nav bar will only be displayed to managers
-const isManager = ref(false);
-const isLoggedIn = ref(true);
-
-onMounted(() => {
-  authenticate();
-});
-
-function authenticate() {
-  const token = localStorage.getItem('bearerToken');
-  if (token.includes('MANAGER')) {
-    isManager.value = true;
-  } else {
-    isManager.value = false;
-  }
-}
+const store = useStore();
 
 </script>
 
@@ -28,7 +12,7 @@ function authenticate() {
 
   <div class="app">
     <!-- nav bar -->
-    <ApplicationTabs v-if="isManager" class="fixedtop" />
+    <ApplicationTabs v-if="store.state.isManager" class="fixedtop" />
 
     <!-- component being rendered -->
     <main class="content">
@@ -58,8 +42,6 @@ function authenticate() {
   background: rgba(211, 211, 211, 0.32);
   padding: 10px;
 }
-
-
 
 .content {
   flex: 1; /* Takes up remaining space */
