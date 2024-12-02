@@ -49,8 +49,15 @@ export class ShiftController {
                     findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
                 }
             }
-            if (req.query.deptfilter) {
-                findOptions.where.push({ departmentID: Like(`%${req.query.deptFilter}%`) })
+            if (req.query.selecteddate && req.query.deptfilter) {
+                findOptions.where.push({
+                    departmentID: Like(`%${req.query.deptfilter}%`),
+                    day: Like(`%${req.query.selecteddate}%`)
+                })
+            } else if (req.query.selecteddate) {
+                findOptions.where.push({
+                    day: Like(`%${req.query.selecteddate}%`)
+                })
             }
 
             console.log('Where Clause: ', findOptions.where)
