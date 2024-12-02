@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import {DatePicker, useToast} from 'primevue'
+import { DatePicker, useToast } from 'primevue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
@@ -17,10 +17,12 @@ const create = ref(false)
 const editing = ref(false)
 const selectedShift = ref()
 const departments = ref()
+const department = ref()
 
 const toast = useToast()
 
 async function getShifts() {
+  const departmentFilter = department.value?.id ? department.value.id: ''
   const options = {
     method: 'GET',
     headers: {
@@ -31,7 +33,8 @@ async function getShifts() {
   }
   const selectedDate = formatDate(date.value)
   console.log(selectedDate)
-  const shiftsFromDB = await fetch(`/api/shifts?search=${selectedDate}`, options)
+  console.log(departmentFilter)
+  const shiftsFromDB = await fetch(`/api/shifts?selecteddate=${selectedDate}&deptfilter=${departmentFilter}`, options)
   const data = await shiftsFromDB.json()
   console.log(data)
   schedule.value = data
@@ -119,8 +122,8 @@ getDepartments()
       />
     </div>
     <div class="right">
-      <Select name="filter" id="filter" :options="departments"
-              optionLabel="name" placeholder="Department Filter" showClear />
+      <Select name="filter" id="filter" :options="departments" v-model="department"
+              optionLabel="name" placeholder="Department Filter" showClear @change="getShifts" />
       <DataTable :value="schedule">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
