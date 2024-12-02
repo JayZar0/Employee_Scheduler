@@ -1,9 +1,4 @@
 <script setup>
-
-/*
-    This component is used for logging in with an email address and password
- */
-
 import { ref, defineEmits } from 'vue';
 import { zodResolver } from '@primeuix/forms/resolvers/zod';
 import { z } from 'zod';
@@ -16,18 +11,20 @@ import InvalidEmailPopup from "./InvalidEmailPopup.vue";
 import { useRouter } from 'vue-router';
 import { useStore } from "vuex";
 
+/*
+    This component is used for logging in with an email address and password
+ */
+
 // ref variables
 const email = ref(''); // bound to entered email
 const password = ref(''); // bound to entered password
-const invalidPasswordVisible = ref(false); // toggles on and off the invalid password dialog
-const invalidEmailVisible = ref(false); // toggles on and off the invalid email dialog
-const router = useRouter();
-const store = useStore();
+const invalidPasswordVisible = ref(false); // toggles on and off the invalid password pop up
+const invalidEmailVisible = ref(false); // toggles on and off the invalid email pop up
+const router = useRouter(); // used for redirect
+const store = useStore(); // global state
 
-// define the email which we will emit to other components
+// email address will be emitted to pop up components
 const emit = defineEmits(['emitEmail']);
-
-// emitting the email entered which will go to popups
 function emitEmail() {
   emit('emitEmail',
       { email : email.value });
@@ -53,11 +50,10 @@ const resolver = ref(zodResolver(
 ));
 
 /**
- * Given a valid, existing, email we check that the password matches what is stored in the DB
- * @param emp the employee that they are trying to log in as (corresponds to the entered email)
+ * Given a valid, existing, email we check that the password matches what is stored for that user in the DB
+ * @param emp the employee that they are trying to log in as
  */
 function validatePassword(emp) {
-  // check the entered password against the stored password for this email
   return password.value === emp.password;
 }
 
@@ -67,20 +63,20 @@ function validatePassword(emp) {
  * @returns {Promise<void>}
  */
 function getEmployeeByEmail(email) {
+  // req options
   const options = {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: `MANAGER_KEY` //TODO: change this ??
+      Authorization: `MANAGER_3061daf3-1f24-49f7-a1ea-aedcfa6e415e` // we can't get emps unless you do it as a manager
+      // don't delete chris tran, or you will break the app thanks
     }
   }
-
-  // search for the employee in the database given the email entered
+  // return res to method caller
   return fetch(`api/employees?search=${email}`, options)
       .then(response => response.json())
-      // emp will be in an array, pull out emp object or return null if none is found
-      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null);
+      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null); // emp will be wrapped in array
 }
 
 /**
@@ -88,7 +84,7 @@ function getEmployeeByEmail(email) {
  */
 function redirect() {
   if (store.state.isManager) {
-    router.push('/managers'); // take managers to splash screen
+    router.push('/schedule'); // could take managers to /managers instead but it seems redundant
   } else {
     router.push('/schedule'); // emps go directly to schedule
   }
@@ -96,62 +92,55 @@ function redirect() {
 
 /**
  * Method for checking if the email and password match an employee in the DB
+ * when someone tries to log in
  */
 function authenticate() {
-  getEmployeeByEmail(email.value) // look in DB for emp with provided email
+  getEmployeeByEmail(email.value) // look up an emp in the DB with the entered email
       .then(matchedEmp => {
         if (matchedEmp) {
-          if (validatePassword(matchedEmp)) { // valid login, give them bearer token and redirect
-            localStorage.setItem('bearerToken', matchedEmp.bearerToken);
+          if (validatePassword(matchedEmp)) {
             store.dispatch('login', matchedEmp); // login globally
+            localStorage.setItem('bearerToken', matchedEmp.bearerToken); // assign bearer token
             redirect(); // will redirect according to level of access
           }
           else { // show password error dialog if password is wrong
+            emitEmail();
             invalidPasswordVisible.value = true;
           }
         } else { // if no emp is found with that email show appropriate error dialog
+          emitEmail();
           invalidEmailVisible.value = true;
         }
       });
 }
-
-/**
- * On submit authenticates the user trying to log in
- */
-const onFormSubmit = () => {
-  emitEmail(); // send the email to the dialog components so they can use it in their messages
-  authenticate() // look up the users credentials, give appropriate bearer token or alert them of error
-};
-
 </script>
 
-
 <template>
-  <h2>Login</h2>
 
-  <!-- Login form using email and password -->
-  <Form v-slot="$form" :resolver="resolver" :initialValues="initialValues" @submit="onFormSubmit" class="flex flex-col gap-4 w-full sm:w-64 items-center">
-    <div class="flex flex-col gap-1">
-      <div class="input-container">
+  <div>
+    <h3>Login</h3>
+    <!-- Login form using email and password -->
+    <Form v-slot="$form" :resolver="resolver" @submit="authenticate" class="flex flex-col gap-4 w-full sm:w-64 items-center">
+      <div class="flex flex-col gap-1">
+        <div class="input-container">
 
-        <!-- Email input -->
-        <InputText name="email" class="text-input" type="text" v-model="email" placeholder="Email"/>
-        <template v-if="$form.email?.invalid">
-          <Message :key="index" severity="error" size="small" variant="simple" class="error-message">{{ $form.email.errors[0].message }}</Message>
-        </template>
+          <!-- Email input -->
+          <InputText name="email" class="text-input" type="text" v-model="email" placeholder="Email"/>
+          <template v-if="$form.email?.invalid">
+            <Message :key="index" severity="error" size="small" variant="simple" class="error-message">{{ $form.email.errors[0].message }}</Message>
+          </template>
 
-        <!-- Password input -->
-        <Password name="password" placeholder="Password" :feedback="false" v-model="password" fluid toggle-mask/>
-        <template v-if="$form.password?.invalid">
-          <Message v-for="(error, index) in $form.password.errors" :key="index" severity="error" size="small" variant="simple" class="error-message">{{ error.message }}</Message>
-        </template>
+          <!-- Password input -->
+          <Password name="password" placeholder="Password" :feedback="false" v-model="password" fluid toggle-mask/>
+          <template v-if="$form.password?.invalid">
+            <Message v-for="(error, index) in $form.password.errors" :key="index" severity="error" size="small" variant="simple" class="error-message">{{ error.message }}</Message>
+          </template>
+        </div>
       </div>
-
-    </div>
-
-    <!-- Submit button triggers authentication -->
-    <Button type="submit" severity="info" label="Submit" />
-  </Form>
+      <!-- Submit button triggers authentication -->
+      <Button type="submit" severity="info" label="Submit" />
+    </Form>
+  </div>
 
   <!--Shown if an invalid password is entered -->
   <InvalidPasswordPopup v-model:visible="invalidPasswordVisible" :email="email"/>
@@ -161,10 +150,9 @@ const onFormSubmit = () => {
 
 </template>
 
-
 <style scoped>
 .input-container {
-  width: 200px; /* Adjust the width as needed */
+  width: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -178,7 +166,7 @@ form {
 }
 
 .error-message {
-  color: #e45555; /* Set the error message text color to red */
+  color: #e45555;
   margin-bottom: 10px;
 }
 

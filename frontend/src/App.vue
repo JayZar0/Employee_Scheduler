@@ -39,13 +39,16 @@ const store = useStore();
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(211, 211, 211, 0.32);
+  background: rgb(239, 243, 247);
   padding: 10px;
 }
 
 .content {
-  flex: 1; /* Takes up remaining space */
-  overflow-y: auto; /* Enable scrolling if content overflows */
-  margin-top: 60px; /* Adjust for the height of the tab bar */
+  flex: 2;
+  display: flex;
+  overflow-y: auto;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 100px;
 }
 </style>

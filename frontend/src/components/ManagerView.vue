@@ -53,11 +53,13 @@ function redirectEmpCRUD() {
 </script>
 
 <template>
-  <h2>Welcome <span>{{ emp.firstName }} {{ emp.lastName }}</span></h2>
+  <div>
+    <h2>Welcome <span>{{ emp.firstName }} {{ emp.lastName }}</span></h2>
 
-  <div class="flexcolumn">
-    <Button class="btn" severity="contrast" @click="redirectSchedule">Shift Scheduler</Button>
-    <Button class="btn" severity="contrast" @click="redirectEmpCRUD">Manage Employees</Button>
+    <div class="flexcolumn">
+      <Button class="btn" severity="contrast" @click="redirectSchedule">Shift Scheduler</Button>
+      <Button class="btn" severity="contrast" @click="redirectEmpCRUD">Manage Employees</Button>
+    </div>
   </div>
 
 </template>

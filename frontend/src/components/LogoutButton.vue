@@ -17,7 +17,7 @@ function logout() {
 
 <template>
   <!-- Display the logout button only if the user is logged in -->
-  <Button v-if="store.state.isLoggedIn" severity="danger" class="fixedbottom btnLogout" @click="logout">
+  <Button v-if="store.state.isLoggedIn" severity="secondary" class="fixedbottom btnLogout" @click="logout">
     Log Out
   </Button>
 </template>
@@ -31,6 +31,6 @@ function logout() {
 
 .btnLogout {
   border-radius: 0;
-  padding: 10px;
+  padding: 12px;
 }
 </style>

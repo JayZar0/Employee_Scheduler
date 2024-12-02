@@ -18,12 +18,11 @@ export default createStore({
             commit('setLoggedIn', false); // update state
             commit('setManager', false); // remove privilege
             localStorage.removeItem('bearerToken'); // remove token
-            router.push('/');
-        }, login( { commit }, employee) {
+            router.push('/'); // send back to log in
+        },
+        login( { commit }, employee) {
             commit('setLoggedIn', true); // update state
             commit('setManager', employee.isManager); // give appropriate privilege
-
-
         }
     }
 });

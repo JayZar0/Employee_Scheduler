@@ -4,6 +4,7 @@
   import { ref } from "vue";
 
   const items = ref([
+    //{ route: '/managers', label: 'Home' }, taking this out because the menu bar removes the need for it
     { route: '/schedule', label: 'Schedule' },
     { route: '/employees', label: 'Manage Employees' }
   ]);
@@ -35,7 +36,8 @@ TabList {
 }
 
 Tab a {
-  color: black;
+  color: #171717;
+  font-size: 1.1em;
 }
 
 </style>

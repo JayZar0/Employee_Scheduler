@@ -33,7 +33,6 @@ const schedule = ref([
 <style scoped>
 .calendar {
   height: fit-content;
-  width: 75%;
 }
 
 .container {
