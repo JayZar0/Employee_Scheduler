@@ -30,7 +30,7 @@ const router = createRouter({
 
 const app = createApp(App)
 
-app.use(router)
+app.use(router).use(store);
 app.use(PrimeVue, {
     theme: {
         preset: Aura

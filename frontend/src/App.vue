@@ -9,16 +9,6 @@ const store = useStore();
 </script>
 
 <template>
-  <nav>
-    <ul class="navlist">
-      <li><RouterLink to="/">Schedule</RouterLink></li>
-      <li><RouterLink to="/employees">Employees</RouterLink></li>
-    </ul>
-  </nav>
-  <main>
-    <RouterView />
-  </main>
-
   <div class="app">
     <!-- nav bar -->
     <ApplicationTabs v-if="store.state.isManager" class="fixedtop" />
