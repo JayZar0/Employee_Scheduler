@@ -122,8 +122,10 @@ getDepartments()
       />
     </div>
     <div class="right">
-      <Select name="filter" id="filter" :options="departments" v-model="department"
-              optionLabel="name" placeholder="Department Filter" showClear @change="getShifts" />
+      <div class="select-box">
+        <Select name="filter" id="filter" :options="departments" v-model="department"
+                optionLabel="name" placeholder="Department Filter" showClear @change="getShifts" />
+      </div>
       <DataTable :value="schedule">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
@@ -178,7 +180,7 @@ getDepartments()
   justify-content: center;
 }
 
-.left {
+.left  {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -191,5 +193,15 @@ getDepartments()
   flex: 1 1 auto;
   margin: 30px;
   padding: 10px;
+}
+
+.button-row {
+  text-align: left;
+}
+
+.select-box {
+  display: block;
+  margin: 20px;
+  text-align: left;
 }
 </style>
