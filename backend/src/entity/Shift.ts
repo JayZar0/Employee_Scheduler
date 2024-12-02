@@ -16,13 +16,15 @@ export class Shift {
     id: string
 
     // This is a foreign key that references the employee working the shift
-    @ManyToOne(type => Employee)
+    @ManyToOne(type => Employee, { eager: true })
     @JoinColumn({ name: "employeeID"})
+    @IsNotEmpty({ message: 'Employee must be selected' })
     employeeID: Employee
 
     // This is a foreign key that references the department assigned to the shift
-    @ManyToOne(type => Department)
+    @ManyToOne(type => Department, { eager: true })
     @JoinColumn({ name: "departmentID" })
+    @IsNotEmpty({ message: 'Department must be selected' })
     departmentID: Department
 
     @Column({ type: 'date' })

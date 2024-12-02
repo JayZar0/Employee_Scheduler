@@ -19,12 +19,12 @@ export class ShiftDTO {
     day:Date
 
     @IsInt()
-    @Max(23)
+    @Max(24)
     @Min(1)
     startHour: number;
 
     @IsInt()
     @Max(24)
-    @Min(2)
+    @Min(1)
     endHour: number;
 }

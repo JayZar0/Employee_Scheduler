@@ -1,16 +1,16 @@
-import * as express from "express"
-import * as bodyParser from "body-parser"
-import { NextFunction, Request, Response } from "express"
-import { AppDataSource } from "./data-source"
-import { RouteDefinition } from "./decorator/RouteDefinition"
-import * as createError from "http-errors"
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
+import { NextFunction, Request, Response } from 'express'
+import { AppDataSource } from './data-source'
+import { RouteDefinition } from './decorator/RouteDefinition'
+import * as createError from 'http-errors'
 import * as cors from 'cors'
 
 // Entity/Controller imports
 import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
-import * as path from "node:path";
+import * as path from 'node:path'
 
 let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED
@@ -27,19 +27,17 @@ AppDataSource.initialize().then(async () => {
 
     app.use((req: Request, res: Response, next: NextFunction) => {
         // Authorization should provide if the user is a employee or a manager
-        if((req.headers.authorization).toString().includes('MANAGER')) {
+        if((req.headers.authorization)?.toString()?.includes('MANAGER')) {
             // If the authorized user is a manager give them full privilege
             corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        } else if ((req.headers.authorization).toString().includes('EMPLOYEE')) {
+        } else if ((req.headers.authorization)?.toString()?.includes('EMPLOYEE')) {
             // If the authorized user is a employee give them read access
             corsOptions.methods = "GET"
         } else {
             // If the user is not authorized at all do not give them access
             corsOptions.methods = ""
         }
-        console.log(corsOptions? `Allowed methods based on authorization ${corsOptions.methods}`:
-            'User has no authorization to the application'
-        )
+        console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
         next()
     })
 
