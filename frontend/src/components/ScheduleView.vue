@@ -9,8 +9,8 @@ import Toast from 'primevue/toast'
 import Select from 'primevue/select'
 import ShiftForm from './ShiftForm.vue'
 import { formatDate, formatTime } from '../utils/date-utils.js'
+import { useStore } from "vuex";
 
-const isManager = ref(true)
 const date = ref(new Date())
 const schedule = ref()
 const create = ref(false)
@@ -20,6 +20,7 @@ const departments = ref()
 const department = ref()
 
 const toast = useToast()
+const store = useStore()
 
 async function getShifts() {
   const departmentFilter = department.value?.id ? department.value.id: ''
@@ -28,15 +29,15 @@ async function getShifts() {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: isManager ? 'MANAGER_KEY': 'EMPLOYEE_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const selectedDate = formatDate(date.value)
-  console.log(selectedDate)
-  console.log(departmentFilter)
+  // console.log(selectedDate)
+  // console.log(departmentFilter)
   const shiftsFromDB = await fetch(`/api/shifts?selecteddate=${selectedDate}&deptfilter=${departmentFilter}`, options)
   const data = await shiftsFromDB.json()
-  console.log(data)
+  // console.log(data)
   schedule.value = data
 }
 
@@ -44,12 +45,12 @@ async function getDepartments() {
   const options = {
     method: 'GET',
     headers: {
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const shiftsFromDB = await fetch(`/api/departments`, options)
   const data = await shiftsFromDB.json()
-  console.log(data)
+  // console.log(data)
   departments.value = data
 }
 
@@ -93,7 +94,7 @@ getDepartments()
 <template>
   <div class="container">
     <div class="left">
-      <div class="button-row" v-if="isManager">
+      <div class="button-row" v-if="store.state.isManager">
         <Button @click="create = true" label="+" id="add"
                 :style="{
                 width: 'fit-content',
@@ -144,7 +145,7 @@ getDepartments()
             {{formatTime(slotProps.data.endHour)}}
           </template>
         </Column>
-        <Column v-if="isManager">
+        <Column v-if="store.state.isManager">
           <template #body="slotProps">
             <Button label="Edit Shift" type="button" @click="() => {
               editing = true

@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import ApplicationTabs from './components/ApplicationTabs.vue'
 import LogoutButton from "./components/LogoutButton.vue";
 import { useStore } from "vuex";

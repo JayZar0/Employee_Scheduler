@@ -84,7 +84,7 @@ function getEmployeeByEmail(email) {
  */
 function redirect() {
   if (store.state.isManager) {
-    router.push('/schedule'); // could take managers to /managers instead but it seems redundant
+    router.push('/managers'); // mgr splash screen
   } else {
     router.push('/schedule'); // emps go directly to schedule
   }

@@ -4,7 +4,7 @@
   import { ref } from "vue";
 
   const items = ref([
-    //{ route: '/managers', label: 'Home' }, taking this out because the menu bar removes the need for it
+    { route: '/managers', label: 'Home' }, //taking this out because the menu bar removes the need for it
     { route: '/schedule', label: 'Schedule' },
     { route: '/employees', label: 'Manage Employees' }
   ]);
