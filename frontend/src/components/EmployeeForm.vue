@@ -85,7 +85,6 @@ async function updateEmployee() {
 
 <template>
   <form>
-
     <div class="form-row">
       <FloatLabel>
         <InputText id="firstname" v-model="employeeToUpdate.firstName" />
