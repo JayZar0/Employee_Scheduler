@@ -12,23 +12,30 @@ import { useToast } from 'primevue'
 const toast = useToast()
 
 const props = defineProps({
-  employee: Object
+  employee: Object,
+  edit: Boolean
 })
 
+const emp = ref(props.edit? props.employee?.id: null)
+
 const employeeToUpdate = ref({
-  id: props.employee?.id,
-  firstName: props.employee?.firstName,
-  lastName: props.employee?.lastName,
-  email: props.employee?.email,
-  password: props.employee?.password,
-  isManager: props.employee?.isManager,
-  maxHours: props.employee?.maxHours
+  firstName: props.edit ? props.employee?.firstName: '',
+  lastName: props.edit ? props.employee?.lastName: '',
+  email: props.edit ? props.employee?.email: '',
+  password: props.edit ? props.employee?.password: '',
+  isManager: props.edit ? props.employee?.isManager: false,
+  maxHours: props.edit ? props.employee?.maxHours: 3
 });
 
 const emits = defineEmits(['submit'])
 
 function handleClick() {
-  updateEmployee()
+  if (props.edit) {
+    updateEmployee()
+  } else {
+    createEmployee()
+  }
+
   emits('submit', 'Edits are complete')
 }
 
@@ -47,7 +54,30 @@ async function deleteEmployee() {
       },
       redirect: 'follow'
     }
-    await fetch(`/api/employees/${employeeToUpdate.value.id}`, options)
+    await fetch(`/api/employees/${emp.value}`, options)
+  } catch (e) {
+    console.error(e)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'There was an error that has occurred during the update process. Please try again.',
+      life: 3000
+    })
+  }
+}
+
+async function createEmployee() {
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'MANAGER_KEY'
+      },
+      body: JSON.stringify(employeeToUpdate.value),
+      redirect: 'follow'
+    }
+    await fetch(`/api/employees`, options)
   } catch (e) {
     console.error(e)
     toast.add({
@@ -70,7 +100,7 @@ async function updateEmployee() {
       body: JSON.stringify(employeeToUpdate.value),
       redirect: 'follow'
     }
-    await fetch(`/api/employees/${employeeToUpdate.value.id}`, options)
+    await fetch(`/api/employees/${emp.value}`, options)
   } catch (e) {
     console.error(e)
     toast.add({
@@ -105,7 +135,7 @@ async function updateEmployee() {
     </div>
     <div class="form-row">
       <FloatLabel>
-        <Password id="password" v-model="employeeToUpdate.password" :feedback="false" />
+        <Password id="password" v-model="employeeToUpdate.password" :feedback="false" toggleMask />
         <label for="password">Password</label>
       </FloatLabel>
     </div>
@@ -115,13 +145,13 @@ async function updateEmployee() {
     </div>
     <div class="form-row">
       <FloatLabel>
-        <InputNumber id="maxHours" v-model="employeeToUpdate.maxHours" show-buttons />
+        <InputNumber id="maxHours" v-model="employeeToUpdate.maxHours" show-buttons :max="40" :min="3" />
         <label for="maxHours">Max Hours</label>
         <Toast />
       </FloatLabel>
     </div>
-    <Button label="Submit Edits" type="button" @click="handleClick" />
-    <Button label="Delete Employee" type="button" @click="handleDelete" />
+    <Button label="Submit" type="button" @click="handleClick" />
+    <Button v-if="edit" label="Delete Employee" type="button" @click="handleDelete" />
   </form>
 </template>
 

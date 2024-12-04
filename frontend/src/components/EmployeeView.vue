@@ -52,9 +52,9 @@ getEmployees()
 <template>
   <div>
     <h2>Manage Employees</h2>
-    <Button label="Add Employee" type="button" @click="add = true" />
-    <Dialog v-model:visible="add" modal header="Edit Employee">
-      <EmployeeForm @submit="editHandler" :employee="selectedEmployee" />
+    <Button label="Register Employee" type="button" @click="add = true" />
+    <Dialog v-model:visible="add" modal header="Register Employee">
+      <EmployeeForm @submit="addHandler" :employee="selectedEmployee" :edit="false" />
     </Dialog>
     <DataTable :value="employees">
       <Column field="firstName" header="First Name" />
@@ -68,7 +68,7 @@ getEmployees()
             selectedEmployee = slotProps.data
           }" />
           <Dialog v-model:visible="edit" modal header="Edit Employee">
-            <EmployeeForm @submit="editHandler" :employee="selectedEmployee" />
+            <EmployeeForm @submit="editHandler" :employee="selectedEmployee" :edit="true" />
           </Dialog>
         </template>
       </Column>
