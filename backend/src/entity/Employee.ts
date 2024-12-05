@@ -13,7 +13,7 @@ export class Employee {
     @IsEmail()
     email: string
 
-    @Column({ type: "varchar" })
+    @Column({ type: "varchar" , select:false})
     @IsNotEmpty({ message: "Password is required" })
     password: string
 
