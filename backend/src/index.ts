@@ -11,6 +11,7 @@ import { DepartmentController } from './controllers/DepartmentController'
 import { EmployeeController } from './controllers/EmployeeController'
 import { ShiftController } from './controllers/ShiftController'
 import * as path from 'node:path'
+import {Employee} from "./entity/Employee";
 
 let corsOptions = {
     credentials: true, // allow cookies on a fetch - IF NEEDED
@@ -25,18 +26,60 @@ AppDataSource.initialize().then(async () => {
     const app = express()
     app.use(bodyParser.json())
 
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        // Authorization should provide if the user is a employee or a manager
-        if((req.headers.authorization)?.toString()?.includes('MANAGER')) {
-            // If the authorized user is a manager give them full privilege
-            corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        } else if ((req.headers.authorization)?.toString()?.includes('EMPLOYEE')) {
-            // If the authorized user is a employee give them read access
-            corsOptions.methods = "GET"
-        } else {
-            // If the user is not authorized at all do not give them access
-            corsOptions.methods = ""
+    // used for looking up the user to determine their access
+    const employeeRepo = AppDataSource.getRepository(Employee);
+
+    app.use(async (req: Request, res: Response, next: NextFunction) => {
+
+        // // grab the guid from the auth header, search for user with that guid
+        // const userId = req.headers.authorization; // grab the guid of the current user
+        // employeeRepo.findOneBy({ id: userId }).then((user) => {
+        //
+        //     if (!user) {
+        //         console.log("null user");
+        //     }
+        //
+        //     if (user.isManager) {
+        //         corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
+        //     } else {
+        //         corsOptions.methods = "GET"
+        //     }
+        // })
+
+        const userId = req.headers.authorization;
+        try {
+            const user = await employeeRepo.findOneBy({ id: userId });
+
+            console.log("found this user via bearerToken");
+            console.log(user);
+
+            if (user) {
+                corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
+            } else {
+                corsOptions.methods = "";
+                console.log("null user");
+            }
+
+            next();
+        } catch (error) {
+            console.error("Error fetching user:", error);
+            next(createError(500));
         }
+
+
+        // // Authorization should provide if the user is a employee or a manager
+        // if((req.headers.authorization)?.toString()?.includes('MANAGER')) {
+        //     // If the authorized user is a manager give them full privilege
+        //     corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
+        // } else if ((req.headers.authorization)?.toString()?.includes('EMPLOYEE')) {
+        //     // If the authorized user is a employee give them read access
+        //     corsOptions.methods = "GET"
+        // } else {
+        //     // If the user is not authorized at all do not give them access
+        //     corsOptions.methods = ""
+        // }
+
+
         console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
         next()
     })

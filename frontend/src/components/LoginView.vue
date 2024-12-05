@@ -69,8 +69,9 @@ function getEmployeeByEmail(email) {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: `MANAGER_3061daf3-1f24-49f7-a1ea-aedcfa6e415e` // we can't get emps unless you do it as a manager
-      // don't delete chris tran, or you will break the app thanks
+      Authorization: `55080c4c-7f13-4415-b7bf-bc76ad654cf6` // we can't get emps unless you do it as a manager
+      //TODO: change this to cur user??
+      // don't delete sherry king, or you will break the app thanks
     }
   }
   // return res to method caller
