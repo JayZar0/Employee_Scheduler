@@ -60,7 +60,7 @@ AppDataSource.initialize().then(async () => {
                 console.log("null user");
             }
 
-            next();
+            // next();
         } catch (error) {
             console.error("Error fetching user:", error);
             next(createError(500));

@@ -62,7 +62,7 @@ function validatePassword(emp) {
  * @param email the email address that the user is trying to log in with
  * @returns {Promise<void>}
  */
-function getEmployeeByEmail(email) {
+async function getEmployeeByEmail(email) {
   // req options
   const options = {
     method: 'GET',
@@ -75,9 +75,12 @@ function getEmployeeByEmail(email) {
     }
   }
   // return res to method caller
-  return fetch(`api/employees?search=${email}`, options)
+  return fetch(`/api/employees?search=${email}`, options)
       .then(response => response.json())
-      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null); // emp will be wrapped in array
+      .then(empsFromDB => {
+        console.log(JSON.stringify(empsFromDB[0]))
+        return empsFromDB[0] ? empsFromDB[0] : null
+      }); // emp will be wrapped in array
 }
 
 /**
