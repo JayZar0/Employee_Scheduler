@@ -132,7 +132,11 @@ getDepartments()
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
         </template>
-        <Column field="employeeID.firstName" header="Name"></Column>
+        <Column header="Name">
+          <template #body="slotProps">
+            {{slotProps.data.employeeID?.firstName || 'Unassigned'}}
+          </template>
+        </Column>
         <Column field="departmentID.name" header="Department"></Column>
         <Column field="day" header="Date"></Column>
         <Column header="Start">
