@@ -17,12 +17,12 @@ function getEmployeeByToken() {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: `MANAGER_KEY` //TODO: change this ??
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
 
   // search for the employee in the database given the token
-  return fetch(`api/employees?search=${ localStorage.getItem('bearerToken') }`, options)
+  return fetch(`api/employees/${ localStorage.getItem('bearerToken') }`, options)
       .then(response => response.json())
       .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null);
 }

@@ -64,6 +64,9 @@ async function login(email, password) {
         },
         body : JSON.stringify({email, password}) // send the email and password to the backend
       });
+  if (!loginRes.ok) {
+    throw new Error('login failed');
+  }
   return loginRes.json();
 }
 
@@ -85,15 +88,14 @@ function redirect() {
  */
 
 async function authenticate() {
-  const userAccessCredentials = await login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
-  console.log(userAccessCredentials);
-  if (userAccessCredentials.bearerToken) {
+
+  try {
+    const userAccessCredentials = await login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
     await store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
     redirect();  // redirect based on the level of access
-  } else {
-    invalidCredentialsPopupVisible.value = true;
+  } catch (e) { // most likely a 403 for incorrect credentials
+      invalidCredentialsPopupVisible.value = true;
   }
-
 }
 
 </script>

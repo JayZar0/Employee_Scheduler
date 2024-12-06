@@ -37,5 +37,5 @@ export class Employee {
 
     @Column({ nullable: true} )
     @IsOptional()
-    bearerToken: string // will either start with MANAGER_ or EMPLOYEE_ depending on access level
+    bearerToken: string
 }
