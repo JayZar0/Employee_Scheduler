@@ -32,7 +32,6 @@ AppDataSource.initialize().then(async () => {
     app.use(async (req: Request, res: Response, next: NextFunction) => {
 
         if(!req.headers.authorization) { // this will log someone in with email and password if they have not already been logged in
-
             if (req.body.email && req.body.password) {
                 const {email, password} = req.body;
                 const user = await employeeRepo.findOneBy({email, password});
@@ -47,7 +46,6 @@ AppDataSource.initialize().then(async () => {
                     console.log("null user");
                 }
             }
-
         } else { // the user is already logged in and has their token
             const user = await employeeRepo.findOneBy({id: req.headers.authorization});
             console.log("found current user via bearerToken: ", user);

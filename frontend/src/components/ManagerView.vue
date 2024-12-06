@@ -24,17 +24,16 @@ function getEmployeeByToken() {
   // search for the employee in the database given the token
   return fetch(`api/employees/${ localStorage.getItem('bearerToken') }`, options)
       .then(response => response.json())
-      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null);
+      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : "somethings wrong");
 }
 
 /**
  * Saves the emp to a ref
  */
-onMounted( () => {
-  getEmployeeByToken().then(matchedEmp => {
-    emp.value = matchedEmp;
-    console.log(matchedEmp);
-  })
+onMounted( async () => {
+  const matchedEmp = await getEmployeeByToken();
+  emp.value = matchedEmp;
+  console.log(matchedEmp);
 });
 
 /**
