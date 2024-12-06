@@ -29,26 +29,38 @@ export class EmployeeController {
      */
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
-        if (req.params.uuid) {
-            return this.employeeRepo.findOneBy({id: req.params.uuid});
-        } else {
-            const findOptions = { where: [], order: {} };
-            const existingColumns = this.employeeRepo.metadata.ownColumns.map(c => c.propertyName);
 
-            // last name as default sort order
-            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'lastName';
-            const sortDirection = req.query.sortorder ? "DESC" : "ASC";
-            findOptions.order[sortByField] = sortDirection;
-            console.log('Order Clause: \n', findOptions.order);
+        console.log("GET call made");
 
-            if (req.query.search) { // only add the where clauses if the search query exists
-                for (const columnName of existingColumns) {
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
+        // grab the token and find current user
+        const bearerToken = req.headers.authorization;
+        const curUser = await this.employeeRepo.findOneBy({id: bearerToken});
+
+        console.log("current user trying to GET employees", curUser)
+
+        // as long as they exist they can view other employees
+        if (curUser) {
+            if (req.params.uuid) {
+                return this.employeeRepo.findOneBy({id: req.params.uuid});
+            } else {
+                const findOptions = { where: [], order: {} };
+                const existingColumns = this.employeeRepo.metadata.ownColumns.map(c => c.propertyName);
+
+                // last name as default sort order
+                const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'lastName';
+                const sortDirection = req.query.sortorder ? "DESC" : "ASC";
+                findOptions.order[sortByField] = sortDirection;
+                console.log('Order Clause: \n', findOptions.order);
+
+                if (req.query.search) { // only add the where clauses if the search query exists
+                    for (const columnName of existingColumns) {
+                        findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
+                    }
                 }
+                console.log('Where Clause: ', findOptions.where);
+                console.log(this.employeeRepo.find(findOptions));
+                return this.employeeRepo.find(findOptions); // returns all if there are no other options specified
             }
-            console.log('Where Clause: ', findOptions.where);
-            console.log(this.employeeRepo.find(findOptions));
-            return this.employeeRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
 

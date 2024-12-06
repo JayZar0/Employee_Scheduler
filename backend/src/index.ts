@@ -31,45 +31,37 @@ AppDataSource.initialize().then(async () => {
 
     app.use(async (req: Request, res: Response, next: NextFunction) => {
 
-        // this will log someone in if they have not already been logged in
-        if(!req.headers.authorization) {
-            try {
-                const { email, password } = req.body;
-                const user = await employeeRepo.findOneBy({ email, password });
-
-                console.log("found this user via email and password");
-                console.log(user);
-
-                if (user) {
-                    // set cors options appropriately
-                    corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
-                    // send back bearerToken and level of access
-                    res.json({
-                        bearerToken: user.id,
-                        isManager: user.isManager
-                    })
-                } else { // invalid user do nothing
-                    corsOptions.methods = "";
-                    console.log("null user");
-                }
-
-            } catch (error) {
-                console.error("Error fetching user:", error);
-                next(createError(500));
+        if(!req.headers.authorization) { // this will log someone in with email and password if they have not already been logged in
+            const {email, password} = req.body;
+            const user = await employeeRepo.findOneBy({email, password});
+            console.log("found this user via email and password: ", user);
+            if (user) {
+                // send back bearerToken and level of access
+                res.json({
+                    bearerToken: user.id,
+                    isManager: user.isManager
+                })
+            } else { // invalid user, do nothing
+                console.log("null user");
             }
-
-            console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
-            next()
+        } else { // the user is already logged in and has their token
+            const user = await employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log("found current user via bearerToken: ", user);
+            corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
         }
-    })
 
-    app.use((req, res, next) => {
-        // Block any requests to unauthorized users
-        if (!corsOptions.methods.includes(req.method)) {
-            next(createError(403))
-        }
-        cors(corsOptions)(req, res, next)
-    })
+        console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
+        next()
+
+    });
+
+    // app.use((req, res, next) => {
+    //     // Block any requests to unauthorized users
+    //     if (!corsOptions.methods.includes(req.method)) {
+    //         next(createError(403))
+    //     }
+    //     cors(corsOptions)(req, res, next)
+    // })
 
     app.options('*', cors(corsOptions))
 
