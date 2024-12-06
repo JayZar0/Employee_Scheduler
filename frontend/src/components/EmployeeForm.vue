@@ -134,12 +134,6 @@ async function updateEmployee() {
       </FloatLabel>
     </div>
     <div class="form-row">
-      <FloatLabel>
-        <Password id="password" v-model="employeeToUpdate.password" :feedback="false" toggleMask />
-        <label for="password">Password</label>
-      </FloatLabel>
-    </div>
-    <div class="form-row">
       <label for="manager">Manager</label>
       <ToggleButton id="manager" v-model="employeeToUpdate.isManager" />
     </div>
