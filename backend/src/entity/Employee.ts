@@ -13,7 +13,7 @@ export class Employee {
     @IsEmail()
     email: string
 
-    @Column({ type: "varchar" , select:false})
+    @Column({ type: "varchar" , select:false, default: "password" })
     @IsNotEmpty({ message: "Password is required" })
     password: string
 
@@ -34,8 +34,4 @@ export class Employee {
     @Column({ type: "boolean", default: false, nullable: true })
     @IsOptional()
     isManager: boolean
-
-    @Column({ nullable: true} )
-    @IsOptional()
-    bearerToken: string
 }
