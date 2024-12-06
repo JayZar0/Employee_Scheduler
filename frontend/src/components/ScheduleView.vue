@@ -28,20 +28,33 @@ async function getShifts() {
   const departmentFilter = department.value?.id ? department.value.id: ''
   const options = {
     method: 'GET',
+    mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       Authorization: isManager ? 'MANAGER_KEY': 'EMPLOYEE_KEY'
-    }
+    },
+    timeout: 1000 * 60
   }
   const selectedDate = formatDate(date.value)
   console.log(selectedDate)
   console.log(departmentFilter)
-  const shiftsFromDB = await fetch(`/api/shifts?selecteddate=${selectedDate}&deptfilter=${departmentFilter}`, options)
-  const data = await shiftsFromDB.json()
-  console.log(data)
-  schedule.value = data
-  loading.value = false
+  try {
+    const shiftsFromDB = await fetch(`/api/shifts?selecteddate=${selectedDate}&deptfilter=${departmentFilter}`, options)
+    const data = await shiftsFromDB.json()
+    console.log(data)
+    schedule.value = data
+  } catch (e)
+  {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'An error has occurred while trying to load the specified date.',
+      life: 3000
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 async function getDepartments() {
