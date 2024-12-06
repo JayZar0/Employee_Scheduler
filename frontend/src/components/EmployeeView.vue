@@ -20,7 +20,7 @@ async function getEmployees() {
   const options = {
     method: 'GET',
     headers: {
-      Authorization: 'MANAGER'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const response = await fetch(`/api/employees`, options)
@@ -63,7 +63,7 @@ getEmployees()
       <Column field="maxHours" header="Max Hours" />
       <Column>
         <template #body="slotProps">
-          <Button label="Edit Employee" type="button" @click="() => {
+          <Button label="Edit Employee" type="button" severity="secondary" @click="() => {
             edit = true
             selectedEmployee = slotProps.data
           }" />

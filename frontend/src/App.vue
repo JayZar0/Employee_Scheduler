@@ -38,7 +38,6 @@ const store = useStore();
   top: 0;
   left: 0;
   width: 100%;
-  background: rgb(239, 243, 247);
   padding: 10px;
 }
 

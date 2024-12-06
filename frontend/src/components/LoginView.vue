@@ -123,7 +123,7 @@ async function authenticate() {
         </div>
       </div>
       <!-- Submit button triggers authentication -->
-      <Button type="submit" severity="info" label="Submit" />
+      <Button type="submit" severity="success" label="Submit" />
     </Form>
   </div>
 

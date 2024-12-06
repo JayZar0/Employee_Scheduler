@@ -24,13 +24,13 @@ function logout() {
 
 <style scoped>
 .fixedbottom {
-  top: 0;
+  top: 10px;
   right: 0;
   position: fixed;
 }
 
 .btnLogout {
   border-radius: 0;
-  padding: 12px;
+  padding: 15px;
 }
 </style>

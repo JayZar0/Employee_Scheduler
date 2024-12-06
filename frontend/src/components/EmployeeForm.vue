@@ -95,7 +95,7 @@ async function updateEmployee() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'MANAGER_KEY'
+        Authorization: localStorage.getItem('bearerToken')
       },
       body: JSON.stringify(employeeToUpdate.value),
       redirect: 'follow'

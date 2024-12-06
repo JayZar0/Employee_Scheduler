@@ -31,33 +31,36 @@ AppDataSource.initialize().then(async () => {
 
     app.use(async (req: Request, res: Response, next: NextFunction) => {
 
-        try {
-            const { email, password } = req.body;
-            const user = await employeeRepo.findOneBy({ email, password });
+        // this will log someone in if they have not already been logged in
+        if(!req.headers.authorization) {
+            try {
+                const { email, password } = req.body;
+                const user = await employeeRepo.findOneBy({ email, password });
 
-            console.log("found this user via email and password");
-            console.log(user);
+                console.log("found this user via email and password");
+                console.log(user);
 
-            if (user) {
-                // set cors options appropriately
-                corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
-                // send back bearerToken and level of access
-                res.json({
-                    bearerToken: user.id,
-                    isManager: user.isManager
-                })
-            } else { // invalid user do nothing
-                corsOptions.methods = "";
-                console.log("null user");
+                if (user) {
+                    // set cors options appropriately
+                    corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
+                    // send back bearerToken and level of access
+                    res.json({
+                        bearerToken: user.id,
+                        isManager: user.isManager
+                    })
+                } else { // invalid user do nothing
+                    corsOptions.methods = "";
+                    console.log("null user");
+                }
+
+            } catch (error) {
+                console.error("Error fetching user:", error);
+                next(createError(500));
             }
 
-        } catch (error) {
-            console.error("Error fetching user:", error);
-            next(createError(500));
+            console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
+            next()
         }
-
-        console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
-        next()
     })
 
     app.use((req, res, next) => {

@@ -33,6 +33,7 @@ function getEmployeeByToken() {
 onMounted( () => {
   getEmployeeByToken().then(matchedEmp => {
     emp.value = matchedEmp;
+    console.log(matchedEmp);
   })
 });
 
@@ -80,7 +81,7 @@ function redirectEmpCRUD() {
 
 span {
   font-family: 'Segoe Print';
-  color: cornflowerblue;
+  color: #184108;
 }
 
 </style>
