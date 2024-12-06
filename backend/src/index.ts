@@ -31,54 +31,30 @@ AppDataSource.initialize().then(async () => {
 
     app.use(async (req: Request, res: Response, next: NextFunction) => {
 
-        // // grab the guid from the auth header, search for user with that guid
-        // const userId = req.headers.authorization; // grab the guid of the current user
-        // employeeRepo.findOneBy({ id: userId }).then((user) => {
-        //
-        //     if (!user) {
-        //         console.log("null user");
-        //     }
-        //
-        //     if (user.isManager) {
-        //         corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        //     } else {
-        //         corsOptions.methods = "GET"
-        //     }
-        // })
-
-        const userId = req.headers.authorization;
         try {
-            const user = await employeeRepo.findOneBy({ id: userId });
+            const { email, password } = req.body;
+            const user = await employeeRepo.findOneBy({ email, password });
 
-            console.log("found this user via bearerToken");
+            console.log("found this user via email and password");
             console.log(user);
 
             if (user) {
+                // set cors options appropriately
                 corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
+                // send back token and level of access
+                res.json({
+                    bearerToken: user.id,
+                    isManager: user.isManager
+                })
             } else {
                 corsOptions.methods = "";
                 console.log("null user");
             }
 
-            next();
         } catch (error) {
             console.error("Error fetching user:", error);
             next(createError(500));
         }
-
-
-        // // Authorization should provide if the user is a employee or a manager
-        // if((req.headers.authorization)?.toString()?.includes('MANAGER')) {
-        //     // If the authorized user is a manager give them full privilege
-        //     corsOptions.methods = "GET,PUT,POST,DELETE,OPTIONS"
-        // } else if ((req.headers.authorization)?.toString()?.includes('EMPLOYEE')) {
-        //     // If the authorized user is a employee give them read access
-        //     corsOptions.methods = "GET"
-        // } else {
-        //     // If the user is not authorized at all do not give them access
-        //     corsOptions.methods = ""
-        // }
-
 
         console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
         next()

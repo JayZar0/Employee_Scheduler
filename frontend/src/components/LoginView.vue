@@ -50,34 +50,23 @@ const resolver = ref(zodResolver(
 ));
 
 /**
- * Given a valid, existing, email we check that the password matches what is stored for that user in the DB
- * @param emp the employee that they are trying to log in as
- */
-function validatePassword(emp) {
-  return password.value === emp.password;
-}
-
-/**
  * Searches the DB for a user with the email provided in the login screen
  * @param email the email address that the user is trying to log in with
- * @returns {Promise<void>}
+ * @param password the password that the employee is trying to log in with
+ * @returns the guid to be used as the bearerToken and the users level of access
  */
-function getEmployeeByEmail(email) {
-  // req options
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `55080c4c-7f13-4415-b7bf-bc76ad654cf6` // we can't get emps unless you do it as a manager
-      //TODO: change this to cur user??
-      // don't delete sherry king, or you will break the app thanks
-    }
-  }
-  // return res to method caller
-  return fetch(`api/employees?search=${email}`, options)
-      .then(response => response.json())
-      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null); // emp will be wrapped in array
+async function login(email, password) {
+
+  const loginRes = await fetch(`/api/`,
+      {
+        method: 'POST', // more secure than GET
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body : JSON.stringify({email, password}) // send the email and password to the backend
+      });
+  return loginRes.data;
 }
 
 /**
@@ -95,25 +84,14 @@ function redirect() {
  * Method for checking if the email and password match an employee in the DB
  * when someone tries to log in
  */
-function authenticate() {
-  getEmployeeByEmail(email.value) // look up an emp in the DB with the entered email
-      .then(matchedEmp => {
-        if (matchedEmp) {
-          if (validatePassword(matchedEmp)) {
-            store.dispatch('login', matchedEmp); // login globally
-            localStorage.setItem('bearerToken', matchedEmp.bearerToken); // assign bearer token
-            redirect(); // will redirect according to level of access
-          }
-          else { // show password error dialog if password is wrong
-            emitEmail();
-            invalidPasswordVisible.value = true;
-          }
-        } else { // if no emp is found with that email show appropriate error dialog
-          emitEmail();
-          invalidEmailVisible.value = true;
-        }
-      });
+
+function authenticate()
+{
+  const userAccessCredentials = login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
+  store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
+  redirect();  // redirect based on the level of access
 }
+
 </script>
 
 <template>
