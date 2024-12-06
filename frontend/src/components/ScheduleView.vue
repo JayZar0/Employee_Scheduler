@@ -7,6 +7,7 @@ import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Toast from 'primevue/toast'
 import Select from 'primevue/select'
+import ProgressSpinner from 'primevue/progressspinner'
 import ShiftForm from './ShiftForm.vue'
 import { formatDate, formatTime } from '../utils/date-utils.js'
 
@@ -20,8 +21,10 @@ const departments = ref()
 const department = ref()
 
 const toast = useToast()
+const loading = ref(false)
 
 async function getShifts() {
+  loading.value = true
   const departmentFilter = department.value?.id ? department.value.id: ''
   const options = {
     method: 'GET',
@@ -38,6 +41,7 @@ async function getShifts() {
   const data = await shiftsFromDB.json()
   console.log(data)
   schedule.value = data
+  loading.value = false
 }
 
 async function getDepartments() {
@@ -98,7 +102,8 @@ getDepartments()
                 :style="{
                 width: 'fit-content',
                 'margin-bottom': '10px',
-                'margin-right': '10px'
+                'margin-right': '10px',
+                'z-index': '0'
               }"
         />
         <label for="add">Add Shift</label>
@@ -134,6 +139,7 @@ getDepartments()
         <Column header="Name">
           <template #body="slotProps">
             {{slotProps.data.employeeID?.firstName || 'Unassigned'}}
+            <ProgressSpinner v-if="loading" />
           </template>
         </Column>
         <Column field="departmentID.name" header="Department"></Column>
