@@ -41,12 +41,12 @@ AppDataSource.initialize().then(async () => {
             if (user) {
                 // set cors options appropriately
                 corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
-                // send back token and level of access
+                // send back bearerToken and level of access
                 res.json({
                     bearerToken: user.id,
                     isManager: user.isManager
                 })
-            } else {
+            } else { // invalid user do nothing
                 corsOptions.methods = "";
                 console.log("null user");
             }

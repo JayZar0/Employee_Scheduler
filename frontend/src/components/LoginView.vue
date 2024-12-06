@@ -6,8 +6,7 @@ import Password from 'primevue/password';
 import Form from '@primevue/forms/form';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import InvalidPasswordPopup from "./InvalidPasswordPopup.vue";
-import InvalidEmailPopup from "./InvalidEmailPopup.vue";
+import InvalidEmailPopup from "./InvalidCredentialsPopup.vue";
 import { useRouter } from 'vue-router';
 import { useStore } from "vuex";
 
@@ -19,7 +18,7 @@ import { useStore } from "vuex";
 const email = ref(''); // bound to entered email
 const password = ref(''); // bound to entered password
 const invalidPasswordVisible = ref(false); // toggles on and off the invalid password pop up
-const invalidEmailVisible = ref(false); // toggles on and off the invalid email pop up
+const invalidCredentialsPopupVisible = ref(false); // toggles on and off the invalid email pop up
 const router = useRouter(); // used for redirect
 const store = useStore(); // global state
 
@@ -88,8 +87,13 @@ function redirect() {
 function authenticate()
 {
   const userAccessCredentials = login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
-  store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
-  redirect();  // redirect based on the level of access
+  if (userAccessCredentials.email && userAccessCredentials.password) {
+    store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
+    redirect();  // redirect based on the level of access
+  } else {
+    invalidCredentialsPopupVisible.value = true;
+  }
+
 }
 
 </script>
@@ -121,11 +125,8 @@ function authenticate()
     </Form>
   </div>
 
-  <!--Shown if an invalid password is entered -->
-  <InvalidPasswordPopup v-model:visible="invalidPasswordVisible" :email="email"/>
-
-  <!--Shown if an email that doesn't correspond to an employee is entered-->
-  <InvalidEmailPopup v-model:visible="invalidEmailVisible" :email="email"/>
+  <!--Shown if invalid credentials are entered -->
+  <InvalidEmailPopup v-model:visible="invalidCredentialsPopupVisible" :email="email"/>
 
 </template>
 
