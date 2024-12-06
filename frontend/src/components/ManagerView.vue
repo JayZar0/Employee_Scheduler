@@ -11,20 +11,29 @@ const emp = ref('');
  * Retrieves an employee from the DB given their bearer token
  * @returns {Promise<* | null>}
  */
-function getEmployeeByToken() {
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: localStorage.getItem('bearerToken')
-    }
-  }
+async function getEmployeeByToken() {
+  try {
+    const options = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: localStorage.getItem('bearerToken')
+      }
+    };
 
-  // search for the employee in the database given the token
-  return fetch(`api/employees/${ localStorage.getItem('bearerToken') }`, options)
-      .then(response => response.json())
-      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : "somethings wrong");
+    const response = await fetch(`api/employees/${localStorage.getItem('bearerToken')}`, options);
+    if (!response.ok) {
+      throw new Error('User Data Cannot be Found');
+    }
+
+    const data = await response.json();
+    return data || "something went wrong"; //TODO: figure out
+
+  } catch (error) {
+    console.error('Error fetching employee:', error);
+    return null;
+  }
 }
 
 /**
@@ -80,7 +89,7 @@ function redirectEmpCRUD() {
 
 span {
   font-family: 'Segoe Print';
-  color: #184108;
+  color: #479724;
 }
 
 </style>
