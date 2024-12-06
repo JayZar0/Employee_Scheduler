@@ -36,7 +36,7 @@ async function getEmployees() {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const shiftsFromDB = await fetch(`/api/employees`, options)
@@ -49,7 +49,7 @@ async function getDepartments() {
   const options = {
     method: 'GET',
     headers: {
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const shiftsFromDB = await fetch(`/api/departments`, options)
@@ -114,7 +114,7 @@ async function updateShift() {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     },
     body: JSON.stringify(newShift.value),
     redirect: 'follow'
@@ -146,7 +146,7 @@ async function deleteShift() {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     },
     redirect: 'follow'
   }

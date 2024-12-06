@@ -50,7 +50,7 @@ async function deleteEmployee() {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'MANAGER_KEY'
+        Authorization: localStorage.getItem('bearerToken')
       },
       redirect: 'follow'
     }

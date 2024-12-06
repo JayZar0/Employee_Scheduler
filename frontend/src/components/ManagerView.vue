@@ -12,28 +12,18 @@ const emp = ref('');
  * @returns {Promise<* | null>}
  */
 async function getEmployeeByToken() {
-  try {
-    const options = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: localStorage.getItem('bearerToken')
-      }
-    };
-
-    const response = await fetch(`api/employees/${localStorage.getItem('bearerToken')}`, options);
-    if (!response.ok) {
-      throw new Error('User Data Cannot be Found');
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: localStorage.getItem('bearerToken')
     }
+  };
 
-    const data = await response.json();
-    return data || "something went wrong"; //TODO: figure out
-
-  } catch (error) {
-    console.error('Error fetching employee:', error);
-    return null;
-  }
+  const response = await fetch(`api/employees/${localStorage.getItem('bearerToken')}`, options);
+  const data = await response.json();
+  return data || "no user found";
 }
 
 /**
