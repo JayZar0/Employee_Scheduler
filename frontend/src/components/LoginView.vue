@@ -17,7 +17,6 @@ import { useStore } from "vuex";
 // ref variables
 const email = ref(''); // bound to entered email
 const password = ref(''); // bound to entered password
-const invalidPasswordVisible = ref(false); // toggles on and off the invalid password pop up
 const invalidCredentialsPopupVisible = ref(false); // toggles on and off the invalid email pop up
 const router = useRouter(); // used for redirect
 const store = useStore(); // global state
@@ -65,8 +64,9 @@ async function login(email, password) {
         },
         body : JSON.stringify({email, password}) // send the email and password to the backend
       });
-  return loginRes.data;
+  return loginRes.json();
 }
+
 
 /**
  * Helper function determines where the user should go after login
@@ -84,11 +84,11 @@ function redirect() {
  * when someone tries to log in
  */
 
-function authenticate()
-{
-  const userAccessCredentials = login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
-  if (userAccessCredentials.email && userAccessCredentials.password) {
-    store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
+async function authenticate() {
+  const userAccessCredentials = await login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
+  console.log(userAccessCredentials);
+  if (userAccessCredentials.bearerToken) {
+    await store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
     redirect();  // redirect based on the level of access
   } else {
     invalidCredentialsPopupVisible.value = true;
