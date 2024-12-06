@@ -26,18 +26,14 @@ AppDataSource.initialize().then(async () => {
     const app = express()
     app.use(bodyParser.json())
 
-    // used for looking up the user to determine their access
     const employeeRepo = AppDataSource.getRepository(Employee);
-
     app.use(async (req: Request, res: Response, next: NextFunction) => {
-
-        if(!req.headers.authorization) { // this will log someone in with email and password if they have not already been logged in
+        // new login, find emp by email & pwd
+        if(!req.headers.authorization) {
             if (req.body.email && req.body.password) {
                 const {email, password} = req.body;
                 const user = await employeeRepo.findOneBy({email, password});
-                console.log("found this user via email and password: ", user);
-                if (user) {
-                    // send back bearerToken and level of access
+                if (user) { // send back bearerToken & level of access if match is found
                     res.json({
                         bearerToken: user.id,
                         isManager: user.isManager
@@ -46,27 +42,27 @@ AppDataSource.initialize().then(async () => {
                     console.log("null user");
                 }
             }
-        } else { // the user is already logged in and has their token
+        // already logged in, find emp by bearerToken
+        } else {
             const user = await employeeRepo.findOneBy({id: req.headers.authorization});
-            console.log("found current user via bearerToken: ", user);
-            corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
+            if (user) {
+                corsOptions.methods = user.isManager ? "GET,PUT,POST,DELETE,OPTIONS" : "GET";
+            }
         }
-
         console.log(`Allowed methods based on authorization ${corsOptions.methods}, Authorization Key Used: ${req.headers.authorization}`)
         next()
-
     });
 
+    // Block any requests by unauthorized users
     app.use((req, res, next) => {
-        // Block any requests to unauthorized users
         if (!corsOptions.methods.includes(req.method)) {
             next(createError(403))
         }
         cors(corsOptions)(req, res, next)
     })
 
-    app.options('*', cors(corsOptions))
-
+    // config
+    app.options('*', cors(corsOptions)) // set the cors options we decided on
     const frontendPath = path.join(__dirname, 'frontend/dist')
     app.use(express.static(frontendPath))
 
@@ -76,18 +72,10 @@ AppDataSource.initialize().then(async () => {
         DepartmentController,
         ShiftController
     ]
-
     controllers.forEach((controller) => {
-        // This is our instantiated class
         const instance = new controller()
-
-        // The prefix saved to our controller
         const path = Reflect.getMetadata('path', controller)
-
-        // Our `routes` array containing all our routes for this controller
         const routes: Array<RouteDefinition> = Reflect.getMetadata('routes', controller)
-
-        // Iterate over all routes and register them to our express application
         routes.forEach((route) => {
             app[route.method](path+route.param, (req:express.Request, res:express.Response,
                                                  next:express.NextFunction) => {
@@ -106,6 +94,7 @@ AppDataSource.initialize().then(async () => {
         next(createError(404))
     })
 
+    // display errors if encountered
     app.use((err, req, res, next) => {
         res.status(err.status || 500)
         res.json({ error: err.message, status: err.status, stack: err.stack.split(/\s{4,}/) })
@@ -114,7 +103,6 @@ AppDataSource.initialize().then(async () => {
     // start express server
     const port  = process.env.PORT || 3004
     app.listen(port)
-
     console.log(`Open http://localhost:${port}/employees to see results`)
 
 }).catch(error => console.log(error))
