@@ -5,11 +5,13 @@ import {Department} from "../entity/Department";
 import {AppDataSource} from "../data-source";
 import {Like, Repository} from "typeorm";
 import {Controller} from "../decorator/Controller";
+import {Employee} from "../entity/Employee";
 
 @Controller('/departments')
 export class DepartmentController {
 
     departmentRepo: Repository<Department> = AppDataSource.getRepository(Department);
+    employeeRepo: Repository<Employee> = AppDataSource.getRepository(Employee); // for validating the token
 
     validOptions : ValidatorOptions = {
         whitelist: true,
@@ -29,26 +31,37 @@ export class DepartmentController {
      */
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
-        if (req.params.uuid) {
-            return this.departmentRepo.findOneBy({id: req.params.uuid})
-        } else {
-            const findOptions = {where: [], order:{}}
-            const existingColumns = this.departmentRepo.metadata.ownColumns.map(c => c.propertyName)
 
-            // Department name as default sort by
-            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'name';
-            const sortDirection = req.query.sortorder ? "DESC" : "ASC";
-            findOptions.order[sortByField] = sortDirection;
-            console.log('Order Clause: \n', findOptions.order);
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
 
-            if (req.query.search) { // only add the where clauses if the search query exists
-                for (const columnName of existingColumns) {
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
+            // as long as they exist they can view departments
+            if (curUser) {
+
+                if (req.params.uuid) {
+                    return this.departmentRepo.findOneBy({id: req.params.uuid})
+                } else {
+                    const findOptions = {where: [], order: {}}
+                    const existingColumns = this.departmentRepo.metadata.ownColumns.map(c => c.propertyName)
+
+                    // Department name as default sort by
+                    const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'name';
+                    const sortDirection = req.query.sortorder ? "DESC" : "ASC";
+                    findOptions.order[sortByField] = sortDirection;
+                    console.log('Order Clause: \n', findOptions.order);
+
+                    if (req.query.search) { // only add the where clauses if the search query exists
+                        for (const columnName of existingColumns) {
+                            findOptions.where.push({[columnName]: Like(`%${req.query.search}%`)});
+                        }
+                    }
+
+                    console.log('Where Clause: ', findOptions.where);
+                    return this.departmentRepo.find(findOptions); // returns all if there are no other options specified
                 }
             }
-
-            console.log('Where Clause: ', findOptions.where);
-            return this.departmentRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
 
