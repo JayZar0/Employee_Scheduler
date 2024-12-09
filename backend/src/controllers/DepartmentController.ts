@@ -107,7 +107,7 @@ export class DepartmentController {
             const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
             console.log(curUser);
 
-            // managers can create
+            // managers can create departments
             if (curUser.isManager) {
 
                 // create & validate
@@ -134,20 +134,30 @@ export class DepartmentController {
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
 
-        // ensure department exists & assign it to an object
-        const departmentToUpdate = await this.departmentRepo.findOneBy({ id:req.params.uuid })
-        Object.assign(departmentToUpdate, req.body)
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
 
-        if (!departmentToUpdate) {
-            next() // if you can't find it boot out to the catch-all
-        } else {
-            // validate & save if possible
-            const violations : ValidationError[] = await validate(departmentToUpdate, this.validOptions)
-            if (violations.length) {
-                res.statusCode = 422
-                return violations
-            } else {
-                return this.departmentRepo.update(req.params.uuid, departmentToUpdate)
+            // managers can update departments
+            if (curUser.isManager) {
+
+                // ensure department exists & assign it to an object
+                const departmentToUpdate = await this.departmentRepo.findOneBy({id: req.params.uuid})
+                Object.assign(departmentToUpdate, req.body)
+
+                if (!departmentToUpdate) {
+                    next() // if you can't find it boot out to the catch-all
+                } else {
+                    // validate & save if possible
+                    const violations: ValidationError[] = await validate(departmentToUpdate, this.validOptions)
+                    if (violations.length) {
+                        res.statusCode = 422
+                        return violations
+                    } else {
+                        return this.departmentRepo.update(req.params.uuid, departmentToUpdate)
+                    }
+                }
             }
         }
     }
