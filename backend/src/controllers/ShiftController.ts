@@ -13,6 +13,7 @@ import {Department} from "../entity/Department";
 export class ShiftController {
 
     shiftRepo: Repository<Shift> = AppDataSource.getRepository(Shift);
+    employeeRepo: Repository<Employee> = AppDataSource.getRepository(Employee); // for validating the token
 
     validOptions : ValidatorOptions = {
         whitelist: true,
@@ -32,36 +33,46 @@ export class ShiftController {
      */
     @Route('get', '/:uuid*?') // *? makes the param optional
     async read(req: Request, res: Response, next: NextFunction) {
-        if (req.params.uuid) {
-            return this.shiftRepo.findOneBy({ id: req.params.uuid})
-        } else {
-            const findOptions = {where: [], order:{}}
-            const existingColumns = this.shiftRepo.metadata.ownColumns.map(c => c.propertyName)
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
 
-            // start hour as default sort
-            const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'startHour';
-            const sortDirection = req.query.sortorder ? "DESC" : "ASC";
-            findOptions.order[sortByField] = sortDirection;
-            console.log('Order Clause: \n', findOptions.order);
+            // any valid user can see the shifts
+            if (curUser) {
 
-            if (req.query.search) { // only add the where clauses if the search query exists
-                for (const columnName of existingColumns) {
-                    findOptions.where.push({ [columnName]: Like(`%${req.query.search}%`) });
+                if (req.params.uuid) {
+                    return this.shiftRepo.findOneBy({id: req.params.uuid})
+                } else {
+                    const findOptions = {where: [], order: {}}
+                    const existingColumns = this.shiftRepo.metadata.ownColumns.map(c => c.propertyName)
+
+                    // start hour as default sort
+                    const sortByField = existingColumns.includes(req.query.sort as string) ? req.query.sort as string : 'startHour';
+                    const sortDirection = req.query.sortorder ? "DESC" : "ASC";
+                    findOptions.order[sortByField] = sortDirection;
+                    console.log('Order Clause: \n', findOptions.order);
+
+                    if (req.query.search) { // only add the where clauses if the search query exists
+                        for (const columnName of existingColumns) {
+                            findOptions.where.push({[columnName]: Like(`%${req.query.search}%`)});
+                        }
+                    }
+                    if (req.query.selecteddate && req.query.deptfilter) {
+                        findOptions.where.push({
+                            departmentID: Like(`%${req.query.deptfilter}%`),
+                            day: Like(`%${req.query.selecteddate}%`)
+                        })
+                    } else if (req.query.selecteddate) {
+                        findOptions.where.push({
+                            day: Like(`%${req.query.selecteddate}%`)
+                        })
+                    }
+
+                    console.log('Where Clause: ', findOptions.where)
+                    return this.shiftRepo.find(findOptions); // returns all if there are no other options specified
                 }
             }
-            if (req.query.selecteddate && req.query.deptfilter) {
-                findOptions.where.push({
-                    departmentID: Like(`%${req.query.deptfilter}%`),
-                    day: Like(`%${req.query.selecteddate}%`)
-                })
-            } else if (req.query.selecteddate) {
-                findOptions.where.push({
-                    day: Like(`%${req.query.selecteddate}%`)
-                })
-            }
-
-            console.log('Where Clause: ', findOptions.where)
-            return this.shiftRepo.find(findOptions); // returns all if there are no other options specified
         }
     }
 
@@ -73,13 +84,23 @@ export class ShiftController {
      */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
-        // if it exists, delete it. If not throw error
-        if (await this.shiftRepo.existsBy({ id: req.params.uuid })) {
-            await this.shiftRepo.delete({ id: req.params.uuid })
-            return ''
-            res.statusCode = 204 // Success "no content" don't send any content or browser will complain
-        } else {
-            next(); // let the catchall in index.ts handle the 404
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
+
+            // managers can delete shifts
+            if (curUser.isManager) {
+
+                // if it exists, delete it. If not throw error
+                if (await this.shiftRepo.existsBy({id: req.params.uuid})) {
+                    await this.shiftRepo.delete({id: req.params.uuid})
+                    return ''
+                    res.statusCode = 204 // Success "no content" don't send any content or browser will complain
+                } else {
+                    next(); // let the catchall in index.ts handle the 404
+                }
+            }
         }
     }
 
@@ -91,31 +112,41 @@ export class ShiftController {
      */
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
-        console.log('Request Body:', req.body); // Debugging
 
-        // weird FK workaround using an "intermediary" data-transfer-object (DTO)
-        const shiftDTO = Object.assign(new ShiftDTO(), req.body);
-        const violations: ValidationError[] = await validate(shiftDTO, this.validOptions);
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
 
-        if (violations.length) {
-            res.statusCode = 422;
-            return res.json(violations);
-        } else {
-            // map the DTO to the "real" object
-            const shiftToInsert = new Shift();
+            // managers can create shifts
+            if (curUser.isManager) {
+                console.log('Request Body:', req.body); // Debugging
 
-            // looking for the object that matches the FK's
-            shiftToInsert.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
-            shiftToInsert.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
+                // weird FK workaround using an "intermediary" data-transfer-object (DTO)
+                const shiftDTO = Object.assign(new ShiftDTO(), req.body);
+                const violations: ValidationError[] = await validate(shiftDTO, this.validOptions);
 
-            // typical transfer
-            shiftToInsert.day = shiftDTO.day;
-            shiftToInsert.startHour = shiftDTO.startHour;
-            shiftToInsert.endHour = shiftDTO.endHour;
+                if (violations.length) {
+                    res.statusCode = 422;
+                    return res.json(violations);
+                } else {
+                    // map the DTO to the "real" object
+                    const shiftToInsert = new Shift();
 
-            // good res
-            res.statusCode = 201;
-            return res.json(await this.shiftRepo.insert(shiftToInsert));
+                    // looking for the object that matches the FK's
+                    shiftToInsert.employeeID = await this.shiftRepo.manager.findOne(Employee, {where: {id: shiftDTO.employeeID}});
+                    shiftToInsert.departmentID = await this.shiftRepo.manager.findOne(Department, {where: {id: shiftDTO.departmentID}});
+
+                    // typical transfer
+                    shiftToInsert.day = shiftDTO.day;
+                    shiftToInsert.startHour = shiftDTO.startHour;
+                    shiftToInsert.endHour = shiftDTO.endHour;
+
+                    // good res
+                    res.statusCode = 201;
+                    return res.json(await this.shiftRepo.insert(shiftToInsert));
+                }
+            }
         }
     }
 
@@ -130,33 +161,42 @@ export class ShiftController {
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
 
-        // ensure shift exists
-        const shiftToAssign = await this.shiftRepo.findOneBy({ id:req.params.uuid })
-        const shiftDTO = Object.assign(shiftToAssign, req.body)
-        // map the DTO to the "real" object
-        const shiftToUpdate = new Shift();
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
 
-        // looking for the object that matches the FK's
-        shiftToUpdate.employeeID = await this.shiftRepo.manager.findOne(Employee, { where: { id: shiftDTO.employeeID } });
-        shiftToUpdate.departmentID = await this.shiftRepo.manager.findOne(Department, { where: { id: shiftDTO.departmentID } });
+            // managers can edit shifts
+            if (curUser.isManager) {
 
-        // typical transfer
-        shiftToUpdate.id = shiftDTO.id;
-        shiftToUpdate.day = shiftDTO.day;
-        shiftToUpdate.startHour = shiftDTO.startHour;
-        shiftToUpdate.endHour = shiftDTO.endHour;
+                // ensure shift exists
+                const shiftToAssign = await this.shiftRepo.findOneBy({id: req.params.uuid})
+                const shiftDTO = Object.assign(shiftToAssign, req.body)
+                // map the DTO to the "real" object
+                const shiftToUpdate = new Shift();
 
-        // update the shift
-        if (!shiftToUpdate) {
-            next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
-        } else {
-            // validate & save
-            const violations : ValidationError[] = await validate(shiftToUpdate, this.validOptions)
-            if (violations.length) {
-                res.statusCode = 422 // Unprocessable Content
-                return violations
-            } else {
-                return this.shiftRepo.update(req.params.uuid, shiftToUpdate)
+                // looking for the object that matches the FK's
+                shiftToUpdate.employeeID = await this.shiftRepo.manager.findOne(Employee, {where: {id: shiftDTO.employeeID}});
+                shiftToUpdate.departmentID = await this.shiftRepo.manager.findOne(Department, {where: {id: shiftDTO.departmentID}});
+
+                // typical transfer
+                shiftToUpdate.id = shiftDTO.id;
+                shiftToUpdate.day = shiftDTO.day;
+                shiftToUpdate.startHour = shiftDTO.startHour;
+                shiftToUpdate.endHour = shiftDTO.endHour;
+
+                // update the shift
+                if (!shiftToUpdate) {
+                    next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
+                } else {
+                    // validate & save
+                    const violations: ValidationError[] = await validate(shiftToUpdate, this.validOptions)
+                    if (violations.length) {
+                        res.statusCode = 422 // Unprocessable Content
+                        return violations
+                    } else {
+                        return this.shiftRepo.update(req.params.uuid, shiftToUpdate)
+                    }
+                }
             }
         }
     }
