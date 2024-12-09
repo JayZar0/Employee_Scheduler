@@ -72,7 +72,7 @@ async function createEmployee() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'MANAGER_KEY'
+        Authorization: localStorage.getItem('bearerToken')
       },
       body: JSON.stringify(employeeToUpdate.value),
       redirect: 'follow'
