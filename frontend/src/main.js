@@ -6,7 +6,7 @@ import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import 'primeicons/primeicons.css';
 import './style.css'
-import store from './store';
+import store from './stores/store.js';
 
 import App from './App.vue'
 import ScheduleView from "./components/ScheduleView.vue";
