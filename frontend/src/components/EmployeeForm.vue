@@ -22,7 +22,7 @@ const employeeToUpdate = ref({
   firstName: props.edit ? props.employee?.firstName: '',
   lastName: props.edit ? props.employee?.lastName: '',
   email: props.edit ? props.employee?.email: '',
-  password: props.edit ? props.employee?.password: '',
+  password: props.edit ? null: '',
   isManager: props.edit ? props.employee?.isManager: false,
   maxHours: props.edit ? props.employee?.maxHours: 3
 });

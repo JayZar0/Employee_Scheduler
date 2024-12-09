@@ -14,7 +14,8 @@ export class Employee {
     email: string
 
     @Column({ type: "varchar" , select:false, default: "password" })
-    @IsNotEmpty({ message: "Password is required" })
+    @IsOptional({ message: "Password is required" })
+    @Min(6, { message: "The password must be 6 characters long" })
     password: string
 
     @Column({ type: "nvarchar" })

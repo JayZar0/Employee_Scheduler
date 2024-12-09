@@ -6,7 +6,6 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import EmployeeForm from './EmployeeForm.vue'
 
-const search = ref()
 const employees = ref()
 const selectedEmployee = ref()
 const edit = ref(false)
