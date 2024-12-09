@@ -133,21 +133,31 @@ export class EmployeeController {
     @Route('put', '/:uuid')
     async update (req: Request, res: Response, next: NextFunction) {
 
-        // ensure employee exists
-        const employeeToUpdate = await this.employeeRepo.findOneBy({ id:req.params.uuid })
-        Object.assign(employeeToUpdate, req.body)
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
 
-        // update the employee
-        if (!employeeToUpdate) {
-            next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
-        } else {
-            // validate & save
-            const violations : ValidationError[] = await validate(employeeToUpdate, this.validOptions)
-            if (violations.length) {
-                res.statusCode = 422 // Unprocessable Content
-                return violations
-            } else {
-                return this.employeeRepo.update(req.params.uuid, employeeToUpdate)
+            // Only managers can update
+            if (curUser.isManager) {
+
+                // ensure employee exists
+                const employeeToUpdate = await this.employeeRepo.findOneBy({id: req.params.uuid})
+                Object.assign(employeeToUpdate, req.body)
+
+                // update the employee
+                if (!employeeToUpdate) {
+                    next() // gets caught by the UMBRELLA code in index.ts to thorugh a 404
+                } else {
+                    // validate & save
+                    const violations: ValidationError[] = await validate(employeeToUpdate, this.validOptions)
+                    if (violations.length) {
+                        res.statusCode = 422 // Unprocessable Content
+                        return violations
+                    } else {
+                        return this.employeeRepo.update(req.params.uuid, employeeToUpdate)
+                    }
+                }
             }
         }
     }
