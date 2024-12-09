@@ -101,16 +101,27 @@ export class DepartmentController {
      */
     @Route('post')
     async create(req: Request, res: Response, next: NextFunction) {
-        // create & validate
-        const departmentToCreate = Object.assign(new Department(), req.body)
-        const violations : ValidationError[] = await validate(departmentToCreate, this.validOptions)
 
-        if (violations.length) { // there are errors
-            res.statusCode = 422 // throw an error
-            return violations
-        } else {
-            res.statusCode = 201 // create it if its good to go
-            return this.departmentRepo.insert(departmentToCreate)
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
+
+            // managers can create
+            if (curUser.isManager) {
+
+                // create & validate
+                const departmentToCreate = Object.assign(new Department(), req.body)
+                const violations: ValidationError[] = await validate(departmentToCreate, this.validOptions)
+
+                if (violations.length) { // there are errors
+                    res.statusCode = 422 // throw an error
+                    return violations
+                } else {
+                    res.statusCode = 201 // create it if its good to go
+                    return this.departmentRepo.insert(departmentToCreate)
+                }
+            }
         }
     }
 
