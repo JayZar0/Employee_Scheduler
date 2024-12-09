@@ -57,11 +57,6 @@ export class EmployeeController {
                     return this.employeeRepo.find(findOptions); // returns all if there are no other options specified
                 }
             }
-            else {
-                res.status(403).send('Forbidden - Invalid Token');
-            }
-        } else {
-            res.status(403).send('Forbidden - No Token Included');
         }
     }
 
@@ -73,12 +68,22 @@ export class EmployeeController {
      */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
-        if (await this.employeeRepo.existsBy({ id: req.params.uuid })) {
-            await this.employeeRepo.delete({ id: req.params.uuid })
-            return ''
-            res.statusCode = 204 // Success "no content"
-        } else {
-            next(); // let the catchall in index.ts handle the 404
+
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
+
+            // Only managers can delete
+            if (curUser.isManager) {
+                if (await this.employeeRepo.existsBy({ id: req.params.uuid })) {
+                    await this.employeeRepo.delete({ id: req.params.uuid })
+                    return ''
+                    res.statusCode = 204 // Success "no content"
+                } else {
+                    next(); // let the catchall in index.ts handle the 404
+                }
+            }
         }
     }
 
