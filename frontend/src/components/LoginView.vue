@@ -6,8 +6,7 @@ import Password from 'primevue/password';
 import Form from '@primevue/forms/form';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import InvalidPasswordPopup from "./InvalidPasswordPopup.vue";
-import InvalidEmailPopup from "./InvalidEmailPopup.vue";
+import InvalidEmailPopup from "./InvalidCredentialsPopup.vue";
 import { useRouter } from 'vue-router';
 import { useStore } from "vuex";
 
@@ -18,8 +17,7 @@ import { useStore } from "vuex";
 // ref variables
 const email = ref(''); // bound to entered email
 const password = ref(''); // bound to entered password
-const invalidPasswordVisible = ref(false); // toggles on and off the invalid password pop up
-const invalidEmailVisible = ref(false); // toggles on and off the invalid email pop up
+const invalidCredentialsPopupVisible = ref(false); // toggles on and off the invalid email pop up
 const router = useRouter(); // used for redirect
 const store = useStore(); // global state
 
@@ -50,41 +48,35 @@ const resolver = ref(zodResolver(
 ));
 
 /**
- * Given a valid, existing, email we check that the password matches what is stored for that user in the DB
- * @param emp the employee that they are trying to log in as
- */
-function validatePassword(emp) {
-  return password.value === emp.password;
-}
-
-/**
  * Searches the DB for a user with the email provided in the login screen
  * @param email the email address that the user is trying to log in with
- * @returns {Promise<void>}
+ * @param password the password that the employee is trying to log in with
+ * @returns the guid to be used as the bearerToken and the users level of access
  */
-function getEmployeeByEmail(email) {
-  // req options
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      Authorization: `MANAGER_3061daf3-1f24-49f7-a1ea-aedcfa6e415e` // we can't get emps unless you do it as a manager
-      // don't delete chris tran, or you will break the app thanks
-    }
+async function login(email, password) {
+
+  const loginRes = await fetch(`/api/`,
+      {
+        method: 'POST', // more secure than GET
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body : JSON.stringify({email, password}) // send the email and password to the backend
+      });
+  if (!loginRes.ok) {
+    throw new Error('login failed');
   }
-  // return res to method caller
-  return fetch(`api/employees?search=${email}`, options)
-      .then(response => response.json())
-      .then(empsFromDB => empsFromDB[0] ? empsFromDB[0] : null); // emp will be wrapped in array
+  return loginRes.json();
 }
+
 
 /**
  * Helper function determines where the user should go after login
  */
 function redirect() {
   if (store.state.isManager) {
-    router.push('/schedule'); // could take managers to /managers instead but it seems redundant
+    router.push('/managers'); // mgr splash screen
   } else {
     router.push('/schedule'); // emps go directly to schedule
   }
@@ -94,25 +86,18 @@ function redirect() {
  * Method for checking if the email and password match an employee in the DB
  * when someone tries to log in
  */
-function authenticate() {
-  getEmployeeByEmail(email.value) // look up an emp in the DB with the entered email
-      .then(matchedEmp => {
-        if (matchedEmp) {
-          if (validatePassword(matchedEmp)) {
-            store.dispatch('login', matchedEmp); // login globally
-            localStorage.setItem('bearerToken', matchedEmp.bearerToken); // assign bearer token
-            redirect(); // will redirect according to level of access
-          }
-          else { // show password error dialog if password is wrong
-            emitEmail();
-            invalidPasswordVisible.value = true;
-          }
-        } else { // if no emp is found with that email show appropriate error dialog
-          emitEmail();
-          invalidEmailVisible.value = true;
-        }
-      });
+
+async function authenticate() {
+
+  try {
+    const userAccessCredentials = await login(email.value, password.value); // send the username and password to BE, get back bearerToken and access level
+    await store.dispatch('login', userAccessCredentials); // set the global state with appropriate access
+    redirect();  // redirect based on the level of access
+  } catch (e) { // most likely a 403 for incorrect credentials
+      invalidCredentialsPopupVisible.value = true;
+  }
 }
+
 </script>
 
 <template>
@@ -138,15 +123,12 @@ function authenticate() {
         </div>
       </div>
       <!-- Submit button triggers authentication -->
-      <Button type="submit" severity="info" label="Submit" />
+      <Button type="submit" severity="success" label="Submit" />
     </Form>
   </div>
 
-  <!--Shown if an invalid password is entered -->
-  <InvalidPasswordPopup v-model:visible="invalidPasswordVisible" :email="email"/>
-
-  <!--Shown if an email that doesn't correspond to an employee is entered-->
-  <InvalidEmailPopup v-model:visible="invalidEmailVisible" :email="email"/>
+  <!--Shown if invalid credentials are entered -->
+  <InvalidEmailPopup v-model:visible="invalidCredentialsPopupVisible" :email="email"/>
 
 </template>
 

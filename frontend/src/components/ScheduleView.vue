@@ -10,6 +10,7 @@ import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import ShiftForm from './ShiftForm.vue'
 import { formatDate, formatTime } from '../utils/date-utils.js'
+import { useStore } from "vuex";
 
 const isManager = ref(true)
 const date = ref(new Date())
@@ -21,6 +22,7 @@ const departments = ref()
 const department = ref()
 
 const toast = useToast()
+const store = useStore()
 const loading = ref(false)
 
 async function getShifts() {
@@ -32,9 +34,8 @@ async function getShifts() {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: isManager ? 'MANAGER_KEY': 'EMPLOYEE_KEY'
-    },
-    timeout: 1000 * 60
+      Authorization: localStorage.getItem('bearerToken')
+    }
   }
   const selectedDate = formatDate(date.value)
   console.log(selectedDate)
@@ -61,7 +62,7 @@ async function getDepartments() {
   const options = {
     method: 'GET',
     headers: {
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const shiftsFromDB = await fetch(`/api/departments`, options)
@@ -110,7 +111,7 @@ getDepartments()
 <template>
   <div class="container">
     <div class="left">
-      <div class="button-row" v-if="isManager">
+      <div class="button-row" v-if="store.state.isManager">
         <Button @click="create = true" label="+" id="add"
                 :style="{
                 width: 'fit-content',
@@ -167,7 +168,7 @@ getDepartments()
             {{formatTime(slotProps.data.endHour)}}
           </template>
         </Column>
-        <Column v-if="isManager">
+        <Column v-if="store.state.isManager">
           <template #body="slotProps">
             <Button label="Edit Shift" type="button" @click="() => {
               editing = true

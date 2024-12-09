@@ -15,14 +15,15 @@ export default createStore({
     },
     actions: {
         logout({ commit }, router) {
-            commit('setLoggedIn', false); // update state
+            commit('setLoggedIn', false);
             commit('setManager', false); // remove privilege
             localStorage.removeItem('bearerToken'); // remove token
             router.push('/'); // send back to log in
         },
-        login( { commit }, employee) {
-            commit('setLoggedIn', true); // update state
-            commit('setManager', employee.isManager); // give appropriate privilege
+        login( { commit }, userAccessCredentials) {
+            commit('setLoggedIn', true);
+            commit('setManager', userAccessCredentials.isManager); // give appropriate privilege
+            localStorage.setItem('bearerToken', userAccessCredentials.bearerToken); // set bearer token
         }
     }
 });

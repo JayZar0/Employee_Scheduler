@@ -19,8 +19,8 @@ const props = defineProps({
 
 <template>
 
-  <Dialog v-model:visible="visible" modal header="No Account Exists" :style="{ width: '25rem' }">
-    <span class="text-surface-500 dark:text-surface-400 block mb-8">No account was found for the email address {{ props.email }}</span>
+  <Dialog v-model:visible="visible" modal header="Invalid Credentials" :style="{ width: '25rem' }">
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">The email or password is incorrect for {{props.email}} </span>
   </Dialog>
 
 </template>

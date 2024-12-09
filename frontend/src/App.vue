@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import ApplicationTabs from './components/ApplicationTabs.vue'
 import LogoutButton from "./components/LogoutButton.vue";
 import { useStore } from "vuex";
@@ -38,7 +38,6 @@ const store = useStore();
   top: 0;
   left: 0;
   width: 100%;
-  background: rgb(239, 243, 247);
   padding: 10px;
 }
 

@@ -20,7 +20,7 @@ async function getEmployees() {
   const options = {
     method: 'GET',
     headers: {
-      Authorization: 'MANAGER'
+      Authorization: localStorage.getItem('bearerToken')
     }
   }
   const response = await fetch(`/api/employees`, options)
