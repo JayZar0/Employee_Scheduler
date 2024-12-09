@@ -73,12 +73,23 @@ export class DepartmentController {
      */
     @Route('delete', '/:uuid') // param is required
     async delete(req: Request, res: Response, next: NextFunction) {
-        if (await this.departmentRepo.existsBy({ id: req.params.uuid })) {
-            await this.departmentRepo.delete({ id: req.params.uuid })
-            return ''
-            res.statusCode = 204 // success, no response body
-        } else {
-            next(); // let the catchall in index.ts handle the 404
+
+        // grab the token and find current user
+        if (req.headers.authorization) {
+            const curUser = await this.employeeRepo.findOneBy({id: req.headers.authorization});
+            console.log(curUser);
+
+            // managers can delete departments
+            if (curUser.isManager) {
+
+                if (await this.departmentRepo.existsBy({id: req.params.uuid})) {
+                    await this.departmentRepo.delete({id: req.params.uuid})
+                    return ''
+                    res.statusCode = 204 // success, no response body
+                } else {
+                    next(); // let the catchall in index.ts handle the 404
+                }
+            }
         }
     }
 
