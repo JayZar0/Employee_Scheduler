@@ -7,10 +7,12 @@ import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Toast from 'primevue/toast'
 import Select from 'primevue/select'
+import ProgressSpinner from 'primevue/progressspinner'
 import ShiftForm from './ShiftForm.vue'
 import { formatDate, formatTime } from '../utils/date-utils.js'
 import { useStore } from "vuex";
 
+const isManager = ref(true)
 const date = ref(new Date())
 const schedule = ref()
 const create = ref(false)
@@ -21,11 +23,14 @@ const department = ref()
 
 const toast = useToast()
 const store = useStore()
+const loading = ref(false)
 
 async function getShifts() {
+  loading.value = true
   const departmentFilter = department.value?.id ? department.value.id: ''
   const options = {
     method: 'GET',
+    mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -33,12 +38,24 @@ async function getShifts() {
     }
   }
   const selectedDate = formatDate(date.value)
-  // console.log(selectedDate)
-  // console.log(departmentFilter)
-  const shiftsFromDB = await fetch(`/api/shifts?selecteddate=${selectedDate}&deptfilter=${departmentFilter}`, options)
-  const data = await shiftsFromDB.json()
-  // console.log(data)
-  schedule.value = data
+  console.log(selectedDate)
+  console.log(departmentFilter)
+  try {
+    const shiftsFromDB = await fetch(`/api/shifts?selecteddate=${selectedDate}&deptfilter=${departmentFilter}`, options)
+    const data = await shiftsFromDB.json()
+    console.log(data)
+    schedule.value = data
+  } catch (e)
+  {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'An error has occurred while trying to load the specified date.',
+      life: 3000
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 async function getDepartments() {
@@ -50,7 +67,7 @@ async function getDepartments() {
   }
   const shiftsFromDB = await fetch(`/api/departments`, options)
   const data = await shiftsFromDB.json()
-  // console.log(data)
+  console.log(data)
   departments.value = data
 }
 
@@ -99,7 +116,8 @@ getDepartments()
                 :style="{
                 width: 'fit-content',
                 'margin-bottom': '10px',
-                'margin-right': '10px'
+                'margin-right': '10px',
+                'z-index': '0'
               }"
         />
         <label for="add">Add Shift</label>
@@ -135,6 +153,7 @@ getDepartments()
         <Column header="Name">
           <template #body="slotProps">
             {{slotProps.data.employeeID?.firstName || 'Unassigned'}}
+            <ProgressSpinner v-if="loading" />
           </template>
         </Column>
         <Column field="departmentID.name" header="Department"></Column>

@@ -50,34 +50,44 @@ getEmployees()
 </script>
 
 <template>
-  <div>
-    <h2>Manage Employees</h2>
-    <Button label="Register Employee" type="button" @click="add = true" />
-    <Dialog v-model:visible="add" modal header="Register Employee">
-      <EmployeeForm @submit="addHandler" :employee="selectedEmployee" :edit="false" />
-    </Dialog>
-    <DataTable :value="employees">
-      <Column field="firstName" header="First Name" />
-      <Column field="lastName" header="Last Name" />
-      <Column field="isManager" header="Manager" />
-      <Column field="maxHours" header="Max Hours" />
-      <Column>
-        <template #body="slotProps">
-          <Button label="Edit Employee" type="button" severity="secondary" @click="() => {
+  <div class="container">
+    <div class="header">
+      <h2>Manage Employees</h2>
+    </div>
+    <div class="row">
+      <Button label="Register Employee" type="button" @click="add = true" />
+      <Dialog v-model:visible="add" modal header="Register Employee">
+        <EmployeeForm @submit="addHandler" :employee="selectedEmployee" :edit="false" />
+      </Dialog>
+    </div>
+    <div class="employee table">
+      <DataTable :value="employees">
+        <Column field="firstName" header="First Name" />
+        <Column field="lastName" header="Last Name" />
+        <Column header="Manager">
+          <template #body="slotProps">
+            {{slotProps.data.isManager ? 'Yes' : 'No'}}
+          </template>
+        </Column>
+        <Column field="maxHours" header="Max Hours" />
+        <Column>
+          <template #body="slotProps">
+            <Button label="Edit Employee" type="button" @click="() => {
             edit = true
             selectedEmployee = slotProps.data
           }" />
-          <Dialog v-model:visible="edit" modal header="Edit Employee">
-            <EmployeeForm @submit="editHandler" :employee="selectedEmployee" :edit="true" />
-          </Dialog>
-        </template>
-      </Column>
-    </DataTable>
+            <Dialog v-model:visible="edit" modal header="Edit Employee">
+              <EmployeeForm @submit="editHandler" :employee="selectedEmployee" :edit="true" />
+            </Dialog>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
 </template>
 
 <style scoped>
-header {
-  display: block;
+div {
+  margin: 15px;
 }
 </style>
