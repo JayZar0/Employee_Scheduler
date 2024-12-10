@@ -22,25 +22,25 @@ const employeeToUpdate = ref({
   firstName: props.edit ? props.employee?.firstName: '',
   lastName: props.edit ? props.employee?.lastName: '',
   email: props.edit ? props.employee?.email: '',
-  password: props.edit ? null: '',
+  password: props.edit ? props.employee?.password: '',
   isManager: props.edit ? props.employee?.isManager: false,
   maxHours: props.edit ? props.employee?.maxHours: 3
 });
 
 const emits = defineEmits(['submit'])
 
-function handleClick() {
+async function handleClick() {
   if (props.edit) {
-    updateEmployee()
+    await updateEmployee()
   } else {
-    createEmployee()
+    await createEmployee()
   }
 
   emits('submit', 'Edits are complete')
 }
 
-function handleDelete() {
-  deleteEmployee()
+async function handleDelete() {
+  await deleteEmployee()
   emits('submit', 'Employee has been deleted')
 }
 
