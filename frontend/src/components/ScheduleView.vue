@@ -8,11 +8,11 @@ import Button from 'primevue/button'
 import Toast from 'primevue/toast'
 import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
+import ContextMenu from 'primevue/contextmenu'
 import ShiftForm from './ShiftForm.vue'
 import { formatDate, formatTime } from '../utils/date-utils.js'
 import { useStore } from "vuex";
 
-const isManager = ref(true)
 const date = ref(new Date())
 const schedule = ref()
 const create = ref(false)
@@ -20,6 +20,14 @@ const editing = ref(false)
 const selectedShift = ref()
 const departments = ref()
 const department = ref()
+const shiftMenu = ref()
+const shiftMenuItems = ref([
+  { label: 'Update Shift', command: () => editing.value = true },
+  { label: 'Delete Shift', command: async () => {
+      await deleteShift()
+      deleteView()
+    } }
+])
 
 const toast = useToast()
 const store = useStore()
@@ -55,6 +63,29 @@ async function getShifts() {
     })
   } finally {
     loading.value = false
+  }
+}
+
+async function deleteShift() {
+  const options = {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('bearerToken')
+    },
+    redirect: 'follow'
+  }
+  try {
+    const result = await fetch(`/api/shifts/${selectedShift.value.id}`, options)
+    console.log(result)
+  } catch (e) {
+    console.log(e)
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'There was an error that has occurred during the delete process. Please try again.',
+      life: 3000
+    })
   }
 }
 
@@ -104,6 +135,10 @@ function deleteView() {
   })
 }
 
+function showShiftMenu(event) {
+  shiftMenu.value.show(event.originalEvent)
+}
+
 getShifts()
 getDepartments()
 </script>
@@ -146,7 +181,8 @@ getDepartments()
         <Select name="filter" id="filter" :options="departments" v-model="department"
                 optionLabel="name" placeholder="Department Filter" showClear @change="getShifts" />
       </div>
-      <DataTable :value="schedule">
+      <ContextMenu ref="shiftMenu" :model="shiftMenuItems" @hide="selectedShift" />
+      <DataTable :value="schedule" v-model:contextMenuSelection="selectedShift" contextMenu @row-contextmenu="showShiftMenu">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
         </template>
@@ -188,7 +224,6 @@ getDepartments()
           </template>
         </Column>
       </DataTable>
-<!--      <ContextMenu ref="menu" :model="shiftOptions" />-->
     </div>
   </div>
 </template>
@@ -212,12 +247,14 @@ getDepartments()
   margin: 30px;
   padding: 10px;
   border-radius: 15px;
+  min-width: 2em;
 }
 
 .right {
   flex: 1 1 auto;
   margin: 30px;
   padding: 10px;
+  min-width: 2em;
 }
 
 .button-row {

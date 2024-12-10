@@ -6,6 +6,7 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import EmployeeForm from './EmployeeForm.vue'
 
+const user = ref(localStorage.getItem('bearerToken'))
 const employees = ref()
 const selectedEmployee = ref()
 const edit = ref(false)
@@ -74,7 +75,7 @@ getEmployees()
             <Button label="Edit Employee" type="button" @click="() => {
             edit = true
             selectedEmployee = slotProps.data
-          }" />
+          }" :disabled="user === slotProps.data.id" />
             <Dialog v-model:visible="edit" modal header="Edit Employee">
               <EmployeeForm @submit="editHandler" :employee="selectedEmployee" :edit="true" />
             </Dialog>

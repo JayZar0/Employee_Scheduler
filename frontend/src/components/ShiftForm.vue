@@ -71,7 +71,7 @@ async function createShift() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'MANAGER_KEY'
+      Authorization: localStorage.getItem('bearerToken')
     },
     body: JSON.stringify(newShift.value),
     redirect: 'follow'
