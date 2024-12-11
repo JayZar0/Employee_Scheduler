@@ -14,8 +14,8 @@ const edit = ref(false)
 const add = ref(false)
 const employeeMenu = ref()
 const employeeMenuItems = ref([
-  { label: 'Update Shift', command: () => editing.value = true },
-  { label: 'Delete Shift', command: async () => {
+  { label: 'Update Employee', command: () => edit.value = true },
+  { label: 'Delete Employee', command: async () => {
       await deleteEmployee()
       await editHandler()
     } }
@@ -38,6 +38,22 @@ async function getEmployees() {
   }
   const response = await fetch(`/api/employees`, options)
   employees.value = await response.json()
+}
+
+async function deleteEmployee() {
+  try {
+    const options = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('bearerToken')
+      },
+      redirect: 'follow'
+    }
+    await fetch(`/api/employees/${emp.value}`, options)
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 /**
