@@ -5,12 +5,25 @@ import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import EmployeeForm from './EmployeeForm.vue'
+import ContextMenu from "primevue/contextmenu";
 
 const user = ref(localStorage.getItem('bearerToken'))
 const employees = ref()
 const selectedEmployee = ref()
 const edit = ref(false)
 const add = ref(false)
+const employeeMenu = ref()
+const employeeMenuItems = ref([
+  { label: 'Update Shift', command: () => editing.value = true },
+  { label: 'Delete Shift', command: async () => {
+      await deleteEmployee()
+      await editHandler()
+    } }
+])
+
+function showEmployeeMenu(event) {
+  employeeMenu.value.show(event.originalEvent)
+}
 
 /**
  * This method will be used to grab the employees from the database
@@ -61,7 +74,8 @@ getEmployees()
       </Dialog>
     </div>
     <div class="employee table">
-      <DataTable :value="employees">
+      <ContextMenu ref="employeeMenu" :model="employeeMenuItems" @hide="selectedEmployee" />
+      <DataTable :value="employees" v-model:contextMenuSelection="selectedEmployee" contextMenu @row-contextmenu="showEmployeeMenu">
         <Column field="firstName" header="First Name" />
         <Column field="lastName" header="Last Name" />
         <Column header="Manager">
