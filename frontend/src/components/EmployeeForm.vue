@@ -27,6 +27,8 @@ const employeeToUpdate = ref({
   maxHours: props.edit ? props.employee?.maxHours: 3
 });
 
+const disableButton = ref(emp.value === localStorage.getItem('bearerToken'))
+
 const emits = defineEmits(['submit'])
 
 async function handleClick() {
@@ -150,8 +152,10 @@ async function updateEmployee() {
         <Toast />
       </FloatLabel>
     </div>
-    <Button label="Submit" type="button" @click="handleClick" />
-    <Button v-if="edit" label="Delete Employee" type="button" @click="handleDelete" />
+    <Button label="Submit" type="button" @click="handleClick" :style="{
+      'margin': '20px'
+    }" />
+    <Button v-if="edit && !disableButton" label="Delete Employee" type="button" @click="handleDelete" :disabled="disableButton" />
   </form>
 </template>
 

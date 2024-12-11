@@ -4,9 +4,10 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import ContextMenu from 'primevue/contextmenu'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue'
 import EmployeeForm from './EmployeeForm.vue'
-import ContextMenu from "primevue/contextmenu";
-import {useToast} from "primevue";
 
 const user = ref(localStorage.getItem('bearerToken'))
 const employees = ref()
@@ -53,13 +54,16 @@ async function deleteEmployee() {
       },
       redirect: 'follow'
     }
-    if (selectedEmployee.value.bearerToken !== localStorage.getItem('bearerToken')) {
+
+    console.log(selectedEmployee.value.id)
+    console.log(localStorage.getItem('bearerToken'))
+    if (selectedEmployee.value.id !== localStorage.getItem('bearerToken')) {
       await fetch(`/api/employees/${selectedEmployee.value.id}`, options)
     } else {
       toast.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'You are not allowed to delete yourself',
+        detail: 'You are not allowed to delete yourself.',
         life: 3000
       })
     }
@@ -102,6 +106,7 @@ getEmployees()
       </Dialog>
     </div>
     <div class="employee table">
+      <Toast />
       <ContextMenu ref="employeeMenu" :model="employeeMenuItems" @hide="selectedEmployee" />
       <DataTable :value="employees" v-model:contextMenuSelection="selectedEmployee" contextMenu @row-contextmenu="showEmployeeMenu">
         <Column field="firstName" header="First Name" />
@@ -117,7 +122,7 @@ getEmployees()
             <Button label="Edit Employee" type="button" @click="() => {
             edit = true
             selectedEmployee = slotProps.data
-          }" :disabled="user === slotProps.data.id" />
+          }"/>
             <Dialog v-model:visible="edit" modal header="Edit Employee">
               <EmployeeForm @submit="editHandler" :employee="selectedEmployee" :edit="true" />
             </Dialog>
