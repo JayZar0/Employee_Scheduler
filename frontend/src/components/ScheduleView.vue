@@ -172,7 +172,7 @@ getDepartments()
       <DatePicker v-model="date" inline class="calendar" @valueChange="getShifts" dateFormat="yy-mm-dd"
                   :style="{
                     width: '100%',
-                    height: '100%'
+                    height: 'auto'
                   }"
       />
     </div>

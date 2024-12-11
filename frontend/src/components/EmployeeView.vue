@@ -108,15 +108,15 @@ getEmployees()
     <div class="employee table">
       <Toast />
       <ContextMenu ref="employeeMenu" :model="employeeMenuItems" @hide="selectedEmployee" />
-      <DataTable :value="employees" v-model:contextMenuSelection="selectedEmployee" contextMenu @row-contextmenu="showEmployeeMenu">
-        <Column field="firstName" header="First Name" />
-        <Column field="lastName" header="Last Name" />
+      <DataTable :value="employees" v-model:contextMenuSelection="selectedEmployee" removableSort contextMenu @row-contextmenu="showEmployeeMenu">
+        <Column field="firstName" header="First Name" sortable="true" />
+        <Column field="lastName" header="Last Name" sortable="true" />
         <Column header="Manager">
           <template #body="slotProps">
             {{slotProps.data.isManager ? 'Yes' : 'No'}}
           </template>
         </Column>
-        <Column field="maxHours" header="Max Hours" />
+        <Column field="maxHours" header="Max Hours" sortable="true" />
         <Column>
           <template #body="slotProps">
             <Button label="Edit Employee" type="button" @click="() => {
