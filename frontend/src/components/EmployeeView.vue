@@ -6,6 +6,7 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import EmployeeForm from './EmployeeForm.vue'
 import ContextMenu from "primevue/contextmenu";
+import {useToast} from "primevue";
 
 const user = ref(localStorage.getItem('bearerToken'))
 const employees = ref()
@@ -20,6 +21,8 @@ const employeeMenuItems = ref([
       await editHandler()
     } }
 ])
+
+const toast = useToast()
 
 function showEmployeeMenu(event) {
   employeeMenu.value.show(event.originalEvent)
@@ -50,7 +53,16 @@ async function deleteEmployee() {
       },
       redirect: 'follow'
     }
-    await fetch(`/api/employees/${emp.value}`, options)
+    if (selectedEmployee.value.bearerToken !== localStorage.getItem('bearerToken')) {
+      await fetch(`/api/employees/${selectedEmployee.value.id}`, options)
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'You are not allowed to delete yourself',
+        life: 3000
+      })
+    }
   } catch (e) {
     console.error(e)
   }
