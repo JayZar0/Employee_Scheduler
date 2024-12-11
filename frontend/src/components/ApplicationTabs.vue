@@ -23,11 +23,11 @@
   <div class="card">
     <Tabs value="/dashboard">
       <TabList>
-        <router-link v-for="tab in items" :key="tab.label" :to="tab.route">
-          <Tab :value="tab.route">
+        <router-link v-for="link in items" :key="link.label" :to="link.route">
+          <Tab :value="link.route">
 <!--            <a v-ripple :href="href" @click="navigate" class="flex items-center gap-2 text-inherit">-->
-              <i :class="tab.icon" />
-              <span class="navText">{{ tab.label }}</span>
+              <i :class="link.icon" />
+              <span class="navText">{{ link.label }}</span>
 <!--            </a>-->
           </Tab>
         </router-link>

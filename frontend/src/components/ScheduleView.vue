@@ -136,7 +136,7 @@ function deleteView() {
 }
 
 function showShiftMenu(event) {
-  shiftMenu.value.show(event.originalEvent)
+    shiftMenu.value.show(event.originalEvent)
 }
 
 getShifts()
@@ -181,7 +181,7 @@ getDepartments()
         <Select name="filter" id="filter" :options="departments" v-model="department"
                 optionLabel="name" placeholder="Department Filter" showClear @change="getShifts" />
       </div>
-      <ContextMenu ref="shiftMenu" :model="shiftMenuItems" @hide="selectedShift" />
+      <ContextMenu ref="shiftMenu" :model="shiftMenuItems" @hide="selectedShift" v-if="store.state.isManager" />
       <DataTable :value="schedule" v-model:contextMenuSelection="selectedShift" contextMenu @row-contextmenu="showShiftMenu">
         <template #header>
           <h5>Shifts on {{formatDate(date)}}</h5>
