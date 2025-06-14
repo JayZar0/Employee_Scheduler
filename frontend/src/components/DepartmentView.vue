@@ -82,7 +82,7 @@ async function addHandler() {
 getEmployees()
 </script>
 
-<template>
+<template class="m-4">
   <div class="container">
     <div class="header">
       <h2>Manage Departments</h2>

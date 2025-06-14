@@ -24,9 +24,11 @@ function logout() {
 
 <style scoped>
 .fixedbottom {
-  top: 10px;
+  top: 32px;
   right: 0;
   position: fixed;
+  padding: 10px;
+  z-index: 10;
 }
 
 .btnLogout {

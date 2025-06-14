@@ -13,14 +13,12 @@ const props = defineProps({
   edit: Boolean
 })
 
-const emp = ref(props.edit? props.department?.id: null)
+const dep = ref(props.edit? props.department?.id: null)
 
 const departmentToUpdate = ref({
   name: props.edit ? props.department?.name: '',
   wage: props.edit ? props.department?.wage: 0,
 });
-
-const disableButton = ref(emp.value === localStorage.getItem('bearerToken'))
 
 const emits = defineEmits(['submit'])
 
@@ -49,7 +47,7 @@ async function deleteDepartment() {
       },
       redirect: 'follow'
     }
-    await fetch(`/api/departments/${emp.value}`, options)
+    await fetch(`/api/departments/${dep.value}`, options)
   } catch (e) {
     console.error(e)
     toast.add({
@@ -95,7 +93,7 @@ async function updateDepartment() {
       body: JSON.stringify(departmentToUpdate.value),
       redirect: 'follow'
     }
-    await fetch(`/api/departments/${emp.value}`, options)
+    await fetch(`/api/departments/${dep.value}`, options)
   } catch (e) {
     console.error(e)
     toast.add({

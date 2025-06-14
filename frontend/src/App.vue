@@ -11,16 +11,20 @@ const store = useStore();
 <template>
   <div class="app">
     <!-- nav bar -->
-    <ApplicationTabs v-if="store.state.isManager" class="fixedtop" />
+    <header class="container fixedtop">
+      <ApplicationTabs v-if="store.state.isManager" />
+      <!-- Log out button shown after successful log in -->
+      <LogoutButton />
+    </header>
+    
 
     <!-- component being rendered -->
-    <main class="content">
+    <main class="content m-3">
       <RouterView />
       <LogoutButton/>
     </main>
 
-    <!-- Log out button shown after successful log in -->
-    <LogoutButton/>
+    
   </div>
 
 </template>
@@ -38,7 +42,7 @@ const store = useStore();
   top: 0;
   left: 0;
   width: 100%;
-  padding: 10px;
+  z-index: 10;
 }
 
 .content {
