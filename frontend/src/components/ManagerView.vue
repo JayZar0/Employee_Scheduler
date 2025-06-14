@@ -49,6 +49,10 @@ function redirectEmpCRUD() {
   router.push('/employees');
 }
 
+function redirectDepCRUD() {
+  router.push('/departments')
+}
+
 </script>
 
 <template>
@@ -58,6 +62,7 @@ function redirectEmpCRUD() {
     <div class="flexcolumn">
       <Button class="btn" severity="contrast" @click="redirectSchedule">Shift Scheduler</Button>
       <Button class="btn" severity="contrast" @click="redirectEmpCRUD">Manage Employees</Button>
+      <Button class="btn" severity="contrast" @click="redirectDepCRUD">Manage Departments</Button>
     </div>
   </div>
 

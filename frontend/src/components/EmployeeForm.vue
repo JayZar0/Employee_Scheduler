@@ -143,7 +143,7 @@ async function updateEmployee() {
     </div>
     <div class="form-row">
       <label for="manager">Manager</label>
-      <ToggleButton id="manager" v-model="employeeToUpdate.isManager" />
+      <ToggleButton id="manager" :disabled="disableButton" v-model="employeeToUpdate.isManager" />
     </div>
     <div class="form-row">
       <FloatLabel>
